@@ -99,6 +99,8 @@ export interface OfficialCertificate {
 
 export interface ContactConfig {
   companyLegalName: string;
+  founderName: string;
+  officialWebsiteUrl: string;
   mersisNo: string;
   otomotivYetkiBelgeNo: string;
   tasinmazYetkiBelgeNo: string;
@@ -143,6 +145,8 @@ export const SITE_URL = "https://gapsansirketlergrubu.com";
 export const CONTACT_CONFIG: ContactConfig = {
   companyLegalName:
     "GAPSAN EMLAK İNŞAAT OTOMOTİV SANAYİ VE TİCARET LİMİTED ŞİRKETİ",
+  founderName: "Harun ŞAN",
+  officialWebsiteUrl: "https://www.gapsanticaret.com.tr/",
   mersisNo: "0389188848300001",
   otomotivYetkiBelgeNo: "3406225",
   tasinmazYetkiBelgeNo: "3410913",
@@ -152,7 +156,7 @@ export const CONTACT_CONFIG: ContactConfig = {
   generalPhoneDisplay: "0212 596 60 00",
   generalPhoneTel: "tel:+902125966000",
   generalEmail: "info@gapsansirketlergrubu.com",
-  insuranceEmail: "gapsan@outlook.com",
+  insuranceEmail: "gapsan@outlook.com.tr",
   socialMedia: {
     facebook: "https://www.facebook.com/share/1EJ9CaU444/?mibextid=wwXlfr",
     instagramOtomotiv:

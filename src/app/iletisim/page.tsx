@@ -64,10 +64,19 @@ export default function IletisimPage() {
               <Mail className="w-5 h-5 text-[#D6A948] mt-1 shrink-0" />
               <div className="space-y-1">
                 <h2 className="font-heading font-bold text-[19px] text-[#111F35]">
-                  E-Posta Adresleri
+                  E-Posta ve Kurumsal Web
                 </h2>
                 <p className="text-[15px] text-[#536174]">
-                  Genel:{" "}
+                  E-Posta:{" "}
+                  <a
+                    href={`mailto:${CONTACT_CONFIG.insuranceEmail}`}
+                    className="font-bold text-[#111F35] hover:underline"
+                  >
+                    {CONTACT_CONFIG.insuranceEmail}
+                  </a>
+                </p>
+                <p className="text-[15px] text-[#536174]">
+                  Genel Bilgi:{" "}
                   <a
                     href={`mailto:${CONTACT_CONFIG.generalEmail}`}
                     className="font-semibold text-[#111F35] hover:underline"
@@ -76,13 +85,18 @@ export default function IletisimPage() {
                   </a>
                 </p>
                 <p className="text-[15px] text-[#536174]">
-                  Sigorta:{" "}
+                  Web Sitesi:{" "}
                   <a
-                    href={`mailto:${CONTACT_CONFIG.insuranceEmail}`}
-                    className="font-semibold text-[#111F35] hover:underline"
+                    href={CONTACT_CONFIG.officialWebsiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-[#111F35] hover:underline"
                   >
-                    {CONTACT_CONFIG.insuranceEmail}
+                    {CONTACT_CONFIG.officialWebsiteUrl.replace("https://", "").replace("/", "")}
                   </a>
+                </p>
+                <p className="text-[13px] text-[#536174] pt-1">
+                  Şirket Müdürü / Yetkilisi: <strong className="text-[#111F35]">{CONTACT_CONFIG.founderName}</strong>
                 </p>
               </div>
             </div>

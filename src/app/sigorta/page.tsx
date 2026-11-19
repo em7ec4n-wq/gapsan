@@ -9,6 +9,7 @@ import {
   MessageCircle,
   CheckCircle2,
   Building2,
+  Globe,
 } from "lucide-react";
 import RequestBuilder from "@/components/RequestBuilder";
 import { CONTACT_CONFIG, INSURANCE_PARTNERS } from "@/lib/gapsan-data";
@@ -97,44 +98,109 @@ export default function SigortaPage() {
 
       {/* Sigorta Tanıtım & Kapsam */}
       <section className="gapsan-container pt-10 pb-4 space-y-8">
-        <div className="bg-[#111F35] text-white rounded-[10px] p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          <div className="lg:col-span-8 space-y-3">
-            <h2 className="font-heading font-bold text-[24px] md:text-[28px] text-white">
-              GAPSAN SİGORTA’da Fiyatlar Hep İyi!
-            </h2>
-            <p className="text-[15px] text-white/90 leading-relaxed">
-              Sigorta alanında hizmete başlayan <strong>GAPSAN SİGORTA</strong>,
-              hayatınızı kolaylaştırmakla beraber sizi her alanda güvence altına
-              alıyor. Kasko, Trafik, DASK (DSK) ve Sağlık sigortalarınızı tek
-              bir adresten, iyi fiyat garantisiyle alın.
-            </p>
-            <div className="pt-2 flex flex-wrap gap-4 text-[14px] text-[#D6A948] font-semibold">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" />
-                Uygun Fiyatlı Sigorta Teklifi
+        <div className="bg-[#111F35] text-white rounded-[10px] p-6 md:p-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-white/15 pb-5">
+            <div className="space-y-2">
+              <span className="px-3 py-1 rounded bg-[#D6A948] text-[#111F35] text-[12px] font-extrabold uppercase tracking-wide">
+                GAPSAN SİGORTA GÜVENCESİ
               </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" />
-                7/24 Müşteri Hizmetleri
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" />
-                Bize Sormadan Teklif Almayın
-              </span>
+              <h2 className="font-heading font-bold text-[24px] md:text-[30px] text-white">
+                GAPSAN SİGORTA’da Fiyatlar Hep İyi!
+              </h2>
+              <p className="text-[17px] text-[#D6A948] font-semibold">
+                İçiniz rahat olsun, artık sigorta alanında da sizlere hizmet sunacağız.
+              </p>
+            </div>
+            <div className="shrink-0 p-3 rounded-[8px] bg-white/5 border border-white/10 text-right">
+              <p className="text-[11px] text-white/70 uppercase tracking-wider">Yetkili / Şirket Müdürü</p>
+              <p className="text-[15px] font-bold text-white">Harun ŞAN</p>
+              <p className="text-[12px] text-[#D6A948]">GAPSAN Şirketler Grubu</p>
             </div>
           </div>
-          <div className="lg:col-span-4 flex flex-col gap-3">
+
+          <p className="text-[15px] md:text-[16px] text-white/90 leading-relaxed max-w-[900px]">
+            Sigorta alanında hizmete başlayan <strong>GAPSAN SİGORTA</strong>, hayatınızı kolaylaştırmakla beraber sizi her alanda güvence altına alıyor. 
+            Uygun Fiyatlı Sigorta Teklifi: <strong>Kasko, Trafik, DSK (DASK) ve Sağlık Sigortanızı</strong> tek bir adresten, iyi fiyat garantisiyle alın.
+          </p>
+
+          <div className="flex flex-wrap gap-4 text-[14px] text-[#D6A948] font-semibold">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4" />
+              Uygun Fiyatlı Sigorta Teklifi
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4" />
+              7/24 Müşteri Hizmetleri Hizmetinizde
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4" />
+              Bize Sormadan Teklif Almayın!
+            </span>
+          </div>
+
+          {/* Quick Contact & Direct Action Strip */}
+          <div className="pt-4 border-t border-white/15 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             <a
-              href={`https://wa.me/905330598804?text=${encodeURIComponent(
+              href={`https://wa.me/${CONTACT_CONFIG.units.sigorta.whatsappNumber}?text=${encodeURIComponent(
                 "Merhaba Gapşan Sigorta, sigorta teklifi almak istiyorum."
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-5 rounded-[10px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-semibold text-[15px]"
+              className="p-3.5 rounded-[10px] bg-white/10 hover:bg-white/15 border border-white/15 transition-colors flex items-center gap-3"
             >
-              <MessageCircle className="w-4 h-4" />
-              <span>Hemen WhatsApp’tan Teklif Al</span>
+              <div className="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center shrink-0">
+                <MessageCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[11px] text-white/70 font-medium">WhatsApp Hattımız</p>
+                <p className="text-[14px] font-bold text-white">{CONTACT_CONFIG.units.sigorta.phoneDisplay}</p>
+              </div>
             </a>
+
+            <a
+              href={CONTACT_CONFIG.generalPhoneTel}
+              className="p-3.5 rounded-[10px] bg-white/10 hover:bg-white/15 border border-white/15 transition-colors flex items-center gap-3"
+            >
+              <div className="w-10 h-10 rounded-full bg-[#D6A948] text-[#111F35] flex items-center justify-center shrink-0">
+                <Phone className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[11px] text-white/70 font-medium">Müşteri Hizmetleri (7/24)</p>
+                <p className="text-[14px] font-bold text-white">{CONTACT_CONFIG.generalPhoneDisplay}</p>
+              </div>
+            </a>
+
+            <a
+              href={`mailto:${CONTACT_CONFIG.insuranceEmail}`}
+              className="p-3.5 rounded-[10px] bg-white/10 hover:bg-white/15 border border-white/15 transition-colors flex items-center gap-3"
+            >
+              <div className="w-10 h-10 rounded-full bg-white/10 text-[#D6A948] flex items-center justify-center shrink-0">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-[11px] text-white/70 font-medium">E-Posta</p>
+                <p className="text-[14px] font-bold text-white truncate">{CONTACT_CONFIG.insuranceEmail}</p>
+              </div>
+            </a>
+
+            <a
+              href={CONTACT_CONFIG.officialWebsiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3.5 rounded-[10px] bg-white/10 hover:bg-white/15 border border-white/15 transition-colors flex items-center gap-3"
+            >
+              <div className="w-10 h-10 rounded-full bg-white/10 text-[#D6A948] flex items-center justify-center shrink-0">
+                <Globe className="w-5 h-5" />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-[11px] text-white/70 font-medium">İnternet Siteniz</p>
+                <p className="text-[14px] font-bold text-white truncate">gapsanticaret.com.tr</p>
+              </div>
+            </a>
+          </div>
+
+          <div className="text-right text-[13px] text-white/75 italic">
+            Saygılarımızla, <strong className="text-white">Harun ŞAN</strong> &bull; {CONTACT_CONFIG.companyLegalName}
           </div>
         </div>
 
@@ -215,25 +281,45 @@ export default function SigortaPage() {
         </div>
 
         <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-5 flex flex-wrap items-center justify-between gap-4 text-[14px] text-[#536174]">
-          <span>
-            Sigorta birimi e-posta:{" "}
-            <a
-              href={`mailto:${CONTACT_CONFIG.insuranceEmail}`}
-              className="font-semibold text-[#111F35] hover:underline inline-flex items-center gap-1"
-            >
-              <Mail className="w-4 h-4 text-[#D6A948]" />
-              {CONTACT_CONFIG.insuranceEmail}
-            </a>
-          </span>
-          <span>
-            Sigorta WhatsApp ve Telefon Hattı:{" "}
-            <a
-              href={CONTACT_CONFIG.units.sigorta.phoneTel}
-              className="font-semibold text-[#111F35] hover:underline"
-            >
-              {CONTACT_CONFIG.units.sigorta.phoneDisplay}
-            </a>
-          </span>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <span>
+              Sigorta E-Posta:{" "}
+              <a
+                href={`mailto:${CONTACT_CONFIG.insuranceEmail}`}
+                className="font-semibold text-[#111F35] hover:underline inline-flex items-center gap-1"
+              >
+                <Mail className="w-4 h-4 text-[#D6A948]" />
+                {CONTACT_CONFIG.insuranceEmail}
+              </a>
+            </span>
+            <span>
+              WhatsApp &amp; Telefon:{" "}
+              <a
+                href={CONTACT_CONFIG.units.sigorta.phoneTel}
+                className="font-semibold text-[#111F35] hover:underline"
+              >
+                {CONTACT_CONFIG.units.sigorta.phoneDisplay}
+              </a>
+            </span>
+            <span>
+              Müşteri Hizmetleri:{" "}
+              <a
+                href={CONTACT_CONFIG.generalPhoneTel}
+                className="font-semibold text-[#111F35] hover:underline"
+              >
+                {CONTACT_CONFIG.generalPhoneDisplay}
+              </a>
+            </span>
+          </div>
+          <a
+            href={CONTACT_CONFIG.officialWebsiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[13px] font-semibold text-[#111F35] hover:text-[#D6A948] inline-flex items-center gap-1"
+          >
+            <Globe className="w-4 h-4 text-[#D6A948]" />
+            <span>gapsanticaret.com.tr</span>
+          </a>
         </div>
       </section>
 

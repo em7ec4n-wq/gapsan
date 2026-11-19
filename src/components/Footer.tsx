@@ -159,10 +159,18 @@ export default function Footer() {
         </div>
 
         <div className="mt-5 pt-4 border-t border-[#E0E4EA] flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-[13px] text-[#536174]">
-          <p>
-            {contact.companyLegalName} &bull; MERSİS: {contact.mersisNo} &bull;{" "}
-            {contact.address}
-          </p>
+          <div className="space-y-1">
+            <p>
+              {contact.companyLegalName} &bull; MERSİS: {contact.mersisNo} &bull;{" "}
+              {contact.address}
+            </p>
+            <p className="text-[12px] text-[#536174]">
+              Müşteri Hizmetleri: <a href="tel:+902125966000" className="font-semibold text-[#111F35] hover:underline">0 212 596 60 00</a> &bull; 
+              E-Posta: <a href="mailto:gapsan@outlook.com.tr" className="font-semibold text-[#111F35] hover:underline">gapsan@outlook.com.tr</a> &bull; 
+              Web: <a href="https://www.gapsanticaret.com.tr/" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#111F35] hover:underline">gapsanticaret.com.tr</a> &bull; 
+              Yetkili: <strong className="text-[#111F35]">Harun ŞAN</strong>
+            </p>
+          </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link
               href="/yasal-bilgilendirme"
