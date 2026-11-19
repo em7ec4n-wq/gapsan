@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+:root {
+  --gapsan-navy: #111F35;
+  --gapsan-gold: #D6A948;
+  --gapsan-gold-hover: #c59836;
+  --gapsan-offwhite: #F7F5EF;
+  --gapsan-white: #FFFFFF;
+  --gapsan-text: #182538;
+  --gapsan-text-secondary: #536174;
+  --gapsan-border: #E0E4EA;
+}
+
+@theme inline {
+  --color-navy: #111F35;
+  --color-gold: #D6A948;
+  --color-offwhite: #F7F5EF;
+  --color-ink: #182538;
+  --color-ink-secondary: #536174;
+  --color-line: #E0E4EA;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-manrope), system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--gapsan-offwhite);
+  color: var(--gapsan-text);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 25px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
+}
+
+/* Typography scale matching specification */
+.gapsan-h1 {
+  font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
+  font-weight: 800;
+  font-size: 58px;
+  line-height: 62px;
+  letter-spacing: -0.02em;
+}
+
+.gapsan-h2 {
+  font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 42px;
+  letter-spacing: -0.015em;
+}
+
+@media (max-width: 1024px) {
+  .gapsan-h1 {
+    font-size: 46px;
+    line-height: 52px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gapsan-h1 {
+    font-size: 34px;
+    line-height: 39px;
+  }
+  .gapsan-h2 {
+    font-size: 27px;
+    line-height: 34px;
+  }
+}
+
+/* Container and section spacing */
+.gapsan-container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+@media (max-width: 768px) {
+  .gapsan-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+.gapsan-section {
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+  .gapsan-section {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+}
+
+/* Accessible focus ring */
+:focus-visible {
+  outline: 2px solid #D6A948;
+  outline-offset: 2px;
+}
