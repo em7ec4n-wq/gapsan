@@ -9,7 +9,6 @@ import {
   MessageCircle,
   CheckCircle2,
   Building2,
-  Globe,
 } from "lucide-react";
 import RequestBuilder from "@/components/RequestBuilder";
 import { CONTACT_CONFIG, INSURANCE_PARTNERS } from "@/lib/gapsan-data";
@@ -139,7 +138,7 @@ export default function SigortaPage() {
           </div>
 
           {/* Quick Contact & Direct Action Strip */}
-          <div className="pt-4 border-t border-white/15 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="pt-4 border-t border-white/15 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <a
               href={`https://wa.me/${CONTACT_CONFIG.units.sigorta.whatsappNumber}?text=${encodeURIComponent(
                 "Merhaba Gapşan Sigorta, sigorta teklifi almak istiyorum."
@@ -180,21 +179,6 @@ export default function SigortaPage() {
               <div className="overflow-hidden">
                 <p className="text-[11px] text-white/70 font-medium">E-Posta</p>
                 <p className="text-[14px] font-bold text-white truncate">{CONTACT_CONFIG.insuranceEmail}</p>
-              </div>
-            </a>
-
-            <a
-              href={CONTACT_CONFIG.officialWebsiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3.5 rounded-[10px] bg-white/10 hover:bg-white/15 border border-white/15 transition-colors flex items-center gap-3"
-            >
-              <div className="w-10 h-10 rounded-full bg-white/10 text-[#D6A948] flex items-center justify-center shrink-0">
-                <Globe className="w-5 h-5" />
-              </div>
-              <div className="overflow-hidden">
-                <p className="text-[11px] text-white/70 font-medium">İnternet Siteniz</p>
-                <p className="text-[14px] font-bold text-white truncate">gapsanticaret.com.tr</p>
               </div>
             </a>
           </div>
@@ -311,15 +295,6 @@ export default function SigortaPage() {
               </a>
             </span>
           </div>
-          <a
-            href={CONTACT_CONFIG.officialWebsiteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[13px] font-semibold text-[#111F35] hover:text-[#D6A948] inline-flex items-center gap-1"
-          >
-            <Globe className="w-4 h-4 text-[#D6A948]" />
-            <span>gapsanticaret.com.tr</span>
-          </a>
         </div>
       </section>
 

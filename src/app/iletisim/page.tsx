@@ -105,18 +105,7 @@ export default function IletisimPage() {
                   </p>
                 </div>
                 <div className="pt-2 text-[14px] text-[#536174] border-t border-[#E0E4EA] mt-2">
-                  <p>
-                    Resmi Web:{" "}
-                    <a
-                      href={CONTACT_CONFIG.officialWebsiteUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-bold text-[#111F35] hover:underline"
-                    >
-                      {CONTACT_CONFIG.officialWebsiteUrl.replace("https://", "").replace("/", "")}
-                    </a>
-                  </p>
-                  <p className="text-[13px] pt-0.5">
+                  <p className="text-[13px]">
                     Şirket Müdürü / Yetkilisi: <strong className="text-[#111F35]">{CONTACT_CONFIG.founderName}</strong>
                   </p>
                 </div>

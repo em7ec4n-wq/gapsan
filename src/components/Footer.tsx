@@ -167,7 +167,6 @@ export default function Footer() {
             <p className="text-[12px] text-[#536174]">
               Müşteri Hizmetleri: <a href="tel:+902125966000" className="font-semibold text-[#111F35] hover:underline">0 212 596 60 00</a> &bull; 
               E-Posta: <a href="mailto:gapsan@outlook.com.tr" className="font-semibold text-[#111F35] hover:underline">gapsan@outlook.com.tr</a> &bull; 
-              Web: <a href="https://www.gapsanticaret.com.tr/" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#111F35] hover:underline">gapsanticaret.com.tr</a> &bull; 
               Yetkili: <strong className="text-[#111F35]">Harun ŞAN</strong>
             </p>
           </div>

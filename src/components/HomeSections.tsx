@@ -614,14 +614,6 @@ export function ReachGapsanSection() {
               >
                 E-Posta: {contact.generalEmail}
               </a>
-              <a
-                href={contact.officialWebsiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 hover:text-[#D6A948]"
-              >
-                Web: gapsanticaret.com.tr
-              </a>
             </div>
           </div>
 
