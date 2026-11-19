@@ -150,7 +150,7 @@ export interface ContactConfig {
   };
 }
 
-export const SITE_URL = "https://gapsansirketlergrubu.com";
+export const SITE_URL = "https://gapsangroup.com";
 
 export const CONTACT_CONFIG: ContactConfig = {
   companyLegalName:
