@@ -563,6 +563,14 @@ export function ReachGapsanSection() {
 
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           <div className="md:col-span-7 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded bg-white/15 text-[#D6A948] text-[11px] font-bold">
+                2010’DAN BU YANA GÜVENLE
+              </span>
+              <span className="text-[12px] text-white/80">
+                Yetki Belge No: 340 6225 / 341 0913
+              </span>
+            </div>
             <h2
               id="ulasin-heading"
               className="font-heading font-bold text-[26px] md:text-[32px] text-white"
@@ -570,8 +578,9 @@ export function ReachGapsanSection() {
               Gapşan’a Ulaşın
             </h2>
             <p className="text-[15px] text-white/85 max-w-[480px]">
-              Otomotiv, gayrimenkul ve sigorta ihtiyaçlarınız için hemen
-              bizimle iletişime geçin.
+              Otomotiv (0’ km &amp; senetli satış), gayrimenkul ve sigorta
+              ihtiyaçlarınız için hemen bizimle iletişime geçin. Hafta sonu
+              nöbetçi noter satışımız mevcuttur.
             </p>
             <div className="pt-1 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-white/90">
               <a
@@ -585,7 +594,7 @@ export function ReachGapsanSection() {
                 href={contact.units.otomotiv.phoneTel}
                 className="inline-flex items-center gap-1.5 hover:text-[#D6A948]"
               >
-                Otomotiv: {contact.units.otomotiv.phoneDisplay}
+                Otomotiv &amp; Kredi: {contact.units.otomotiv.phoneDisplay}
               </a>
               <a
                 href={contact.units.gayrimenkul.phoneTel}
@@ -597,7 +606,7 @@ export function ReachGapsanSection() {
                 href={contact.units.sigorta.phoneTel}
                 className="inline-flex items-center gap-1.5 hover:text-[#D6A948]"
               >
-                Sigorta: {contact.units.sigorta.phoneDisplay}
+                Sigorta (7/24): {contact.units.sigorta.phoneDisplay}
               </a>
             </div>
           </div>

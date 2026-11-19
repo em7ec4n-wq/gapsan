@@ -9,9 +9,23 @@ import {
   RotateCcw,
   AlertCircle,
   Phone,
+  ShieldCheck,
+  Clock,
+  CreditCard,
+  Sparkles,
+  BadgeCheck,
+  Landmark,
+  RefreshCw,
+  MessageCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { useGapsanStore } from "@/lib/gapsan-store";
-import { VehicleListing } from "@/lib/gapsan-data";
+import {
+  FINANCE_PARTNERS,
+  SAVINGS_FINANCE_PARTNERS,
+  VehicleListing,
+} from "@/lib/gapsan-data";
+import CertificatesGrid from "./CertificatesGrid";
 
 export default function OtomotivClient() {
   const { vehicles, demoVehicle, previewMode, contact } = useGapsanStore();
@@ -23,7 +37,6 @@ export default function OtomotivClient() {
   const [filterError, setFilterError] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Applied filter state
   const [applied, setApplied] = useState({
     brand: "",
     transmission: "",
@@ -138,7 +151,7 @@ export default function OtomotivClient() {
   return (
     <div>
       {/* Cover */}
-      <section className="relative bg-[#111F35] text-white h-[320px] md:h-[380px] overflow-hidden">
+      <section className="relative bg-[#111F35] text-white min-h-[360px] md:min-h-[420px] py-12 overflow-hidden flex items-center">
         <img
           src="/assets/gapsan/gapsan-otomotiv-kart-konsept.webp"
           alt="Gapşan Otomotiv galeri kapağı"
@@ -149,25 +162,56 @@ export default function OtomotivClient() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(90deg, rgba(17,31,53,0.92) 0%, rgba(17,31,53,0.68) 55%, rgba(17,31,53,0.25) 100%)",
+              "linear-gradient(90deg, rgba(17,31,53,0.94) 0%, rgba(17,31,53,0.75) 60%, rgba(17,31,53,0.3) 100%)",
           }}
         />
-        <div className="relative z-10 h-full gapsan-container flex flex-col justify-center">
-          <h1 className="gapsan-h1 text-white max-w-[600px]">
-            Gapşan Otomotiv
+        <div className="relative z-10 w-full gapsan-container">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="px-3 py-1 rounded bg-[#D6A948] text-[#111F35] text-[12px] font-extrabold uppercase tracking-wide">
+              2010 Yılından Bu Yana Güvenle...
+            </span>
+            <span className="px-3 py-1 rounded bg-white/15 border border-white/25 text-white text-[12px] font-semibold">
+              İkinci El Motorlu Kara Taşıtı Yetki Belge No: 340 6225
+            </span>
+          </div>
+          <h1 className="gapsan-h1 text-white max-w-[740px]">
+            GAPSAN Otomotiv Senetli Satış Merkezi
           </h1>
-          <p className="mt-3 text-[16px] text-white/85 max-w-[540px]">
-            Araç alımı, araç satışı ve takas süreçlerinde şeffaf değerlendirme
-            ve doğrudan birim iletişimi.
+          <p className="mt-3 text-[18px] text-[#D6A948] font-semibold">
+            0’ Kilometre ve 2. Elde Güvenilir Adres
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
+          <p className="mt-2 text-[15px] text-white/90 max-w-[650px]">
+            Kefilsiz, Kredisiz, %30–%40 Peşinat ve 36–48 Aya Varan Taksit
+            Seçenekleri &bull; Taksitleri Sen Belirle, Ödemeye 3 Ay Sonra Başla!
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/?alan=otomotiv#talep"
               className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-[10px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-semibold text-[15px]"
             >
-              <span>Talep Oluştur</span>
+              <span>Talep &amp; Kredi Başvurusu</span>
               <ChevronRight className="w-4 h-4" />
             </Link>
+            <a
+              href={`https://wa.me/905324284332?text=${encodeURIComponent(
+                "Merhaba Gapşan Otomotiv, senetli araç satışı ve kredi başvurusu hakkında bilgi almak istiyorum."
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-[10px] bg-white text-[#111F35] hover:bg-[#F7F5EF] font-semibold text-[15px]"
+            >
+              <MessageCircle className="w-4 h-4 text-[#D6A948]" />
+              <span>WhatsApp Kredi Hattı: 0532 428 43 32</span>
+            </a>
+            <a
+              href={contact.socialMedia.whatsappChannel}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-[10px] bg-[#25D366] hover:bg-[#20ba5a] text-white font-semibold text-[15px]"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>WhatsApp Kanalımızı Takip Edin</span>
+            </a>
             <a
               href={contact.units.otomotiv.phoneTel}
               className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-[10px] border border-white/30 hover:bg-white/10 text-white font-semibold text-[15px]"
@@ -182,61 +226,276 @@ export default function OtomotivClient() {
         </span>
       </section>
 
-      {/* Alım, Satış ve Takas */}
+      {/* GAPSAN OTOMOTİV GÜVENCESİ & KAMPANYA BANNER */}
+      <section className="gapsan-container pt-10 pb-4 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Güvence */}
+          <div className="lg:col-span-7 bg-[#111F35] text-white rounded-[10px] p-6 md:p-8 flex flex-col justify-between gap-4 border border-[#E0E4EA]">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#D6A948]/20 border border-[#D6A948] text-[#D6A948] text-[12px] font-bold">
+                <ShieldCheck className="w-4 h-4" />
+                <span>GAPSAN OTOMOTİV GÜVENCESİ</span>
+              </div>
+              <h2 className="font-heading font-bold text-[24px] md:text-[28px] text-white">
+                Ekspertiz ve Güvenilir Ticaret Garantisi
+              </h2>
+              <p className="text-[15px] text-white/90 leading-relaxed">
+                Müşteri memnuniyeti ve güvenilir ticaret anlayışımız gereği;{" "}
+                <strong className="text-[#D6A948]">
+                  ağır hasar kayıtlı, şase işlemli, podye işlemli, airbag açmış
+                  veya işlem görmüş ve kilometresi ile oynanmış
+                </strong>{" "}
+                araçların alım ve satımını kesinlikle yapmıyoruz.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-white/15 flex flex-wrap items-center justify-between gap-3 text-[13px] text-white/80">
+              <span>Yetki Belge No: 340 6225</span>
+              <span>Değerinde Nakit Araç Alımı &bull; Eski Aracını Getir, Yenisini Götür</span>
+            </div>
+          </div>
+
+          {/* Öne Çıkan Kampanya: Şimdi Al, 3 Ay Sonra Öde */}
+          <div className="lg:col-span-5 bg-white border-2 border-[#D6A948] rounded-[10px] p-6 md:p-8 flex flex-col justify-between gap-4">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#D6A948] text-[#111F35] text-[12px] font-extrabold">
+                <Sparkles className="w-4 h-4" />
+                <span>ÖNE ÇIKAN KAMPANYAMIZ</span>
+              </div>
+              <h2 className="font-heading font-extrabold text-[24px] md:text-[26px] text-[#111F35]">
+                ŞİMDİ AL, 3 AY SONRA ÖDE!
+              </h2>
+              <p className="text-[15px] text-[#536174] leading-relaxed">
+                Senetli taksitli satışlarımızda geçerli olan bu özel kampanya
+                ile aracınızı bugün teslim alın, ödemelerinize tam{" "}
+                <strong className="text-[#111F35]">3 ay sonra</strong> başlayın.
+                Peşinat ödemenizi takiben, ilk taksitiniz için 3 aylık bir
+                erteleme fırsatından yararlanın.
+              </p>
+            </div>
+            <a
+              href={`https://wa.me/905324284332?text=${encodeURIComponent(
+                "Merhaba Gapşan Otomotiv, 'Şimdi Al, 3 Ay Sonra Öde' senetli araç kampanyanız hakkında bilgi almak istiyorum."
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-5 rounded-[10px] bg-[#111F35] hover:bg-[#1b2e4b] text-white font-semibold text-[14px]"
+            >
+              <MessageCircle className="w-4 h-4 text-[#D6A948]" />
+              <span>Kampanyaya Başvur (0532 428 43 32)</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* SENETLİ SATIŞ, KREDİ VE ÖDEME AVANTAJLARI */}
       <section
         id="al-sat-takas"
-        className="gapsan-container py-10 max-[768px]:py-7"
-        aria-labelledby="al-sat-takas-heading"
+        className="gapsan-container py-8"
+        aria-labelledby="avantajlar-heading"
       >
-        <h2
-          id="al-sat-takas-heading"
-          className="gapsan-h2 text-[#111F35] mb-6"
-        >
-          Araç Alım, Satış ve Takas
+        <h2 id="avantajlar-heading" className="gapsan-h2 text-[#111F35] mb-6">
+          Kredi, Senetli Satış ve Takas İmkanlarımız
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              title: "Araç Alımı",
-              desc: "Yayındaki veya ön incelemedeki araçlar hakkında doğrudan bilgi ve fiyat talebi oluşturun.",
-            },
-            {
-              title: "Araç Satışı",
-              desc: "Aracınızın marka, model, yıl ve kilometre bilgisini paylaşarak ön değerlendirme talep edin.",
-            },
-            {
-              title: "Takas",
-              desc: "Mevcut aracınızı yeni bir araçla takas etmek için hızlıca talep özeti hazırlayın.",
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="bg-white border border-[#E0E4EA] rounded-[10px] p-5 flex flex-col justify-between gap-4"
-            >
-              <div>
-                <h3 className="font-heading font-bold text-[19px] text-[#111F35]">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-[14px] text-[#536174] leading-relaxed">
-                  {item.desc}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-6 space-y-2.5">
+            <Clock className="w-6 h-6 text-[#D6A948]" />
+            <h3 className="font-heading font-bold text-[19px] text-[#111F35]">
+              Kimlik Bilgilerinizle Anında 30 Dakikada Krediniz Hazır
+            </h3>
+            <p className="text-[14px] text-[#536174] leading-relaxed">
+              Kredi işlemlerinizi kendi satış ofisimizde hızlı ve kolay bir
+              şekilde gerçekleştiriyoruz. Başvurunuzun onaylandığı aynı gün
+              noter devir işlemleriniz tamamlanır.
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-6 space-y-2.5">
+            <BadgeCheck className="w-6 h-6 text-[#D6A948]" />
+            <h3 className="font-heading font-bold text-[19px] text-[#111F35]">
+              Kefilsiz ve Şartsız Alım Fırsatı
+            </h3>
+            <p className="text-[14px] text-[#536174] leading-relaxed">
+              Kredi skoru ne olursa olsun, kefilsiz ve şartsız olarak{" "}
+              <strong>%30 peşinatla</strong>, <strong>2.69’dan başlayan</strong>{" "}
+              avantajlı oranlar ve <strong>36–48 aya varan vade</strong>{" "}
+              seçenekleri sunuyoruz.
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-6 space-y-2.5">
+            <CreditCard className="w-6 h-6 text-[#D6A948]" />
+            <h3 className="font-heading font-bold text-[19px] text-[#111F35]">
+              Kredi Kartı ile 12 Aya Varan Taksit
+            </h3>
+            <p className="text-[14px] text-[#536174] leading-relaxed">
+              Tüm kredi kartlarına 12 aya varan taksit mevcuttur. Araç
+              peşinatınızı veya aylık senet taksitlerinizi kredi kartıyla
+              ödeyebilirsiniz.
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-6 space-y-2.5">
+            <Landmark className="w-6 h-6 text-[#D6A948]" />
+            <h3 className="font-heading font-bold text-[19px] text-[#111F35]">
+              KKB Puanınıza Göre Avantajlı Teklifler
+            </h3>
+            <ul className="text-[14px] text-[#536174] space-y-1.5 leading-relaxed">
+              <li>
+                &bull; <strong>1500 ve Üzeri KKB Puanı:</strong> Müşterilerimize
+                özel <strong>PEŞİNATSIZ</strong> ve 24 aya varan vade imkanı.
+              </li>
+              <li>
+                &bull; <strong>1250 ve Üzeri KKB Puanı:</strong> Sadece{" "}
+                <strong>%20 peşinatla</strong> aracınıza sahip olma fırsatı.
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-6 space-y-2.5">
+            <Car className="w-6 h-6 text-[#D6A948]" />
+            <h3 className="font-heading font-bold text-[19px] text-[#111F35]">
+              Ticari Müşterilerimize Özel Kredi &amp; Çekle Satış
+            </h3>
+            <p className="text-[14px] text-[#536174] leading-relaxed">
+              Vergi levhalı müşterilerimiz ve şirketler için aracın kasko
+              değerinin <strong>%90’ına kadar</strong> ticari taşıt kredisi
+              kullanma olanağı (Maksimum 36 ay vade ile).{" "}
+              <strong>Firmamızın kısa vadeli çek ile araç satışı vardır.</strong>
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-6 space-y-2.5">
+            <RefreshCw className="w-6 h-6 text-[#D6A948]" />
+            <h3 className="font-heading font-bold text-[19px] text-[#111F35]">
+              Esnek Ödeme, Erken Kapama ve Takas Kolaylığı
+            </h3>
+            <p className="text-[14px] text-[#536174] leading-relaxed">
+              <strong>Erken Kapama Avantajı:</strong> Borcunuzu erken
+              kapattığınızda geriye kalan ayların tüm vade farkı silinir.{" "}
+              <strong>Değişim ve Takas:</strong> Borcunuz devam ederken
+              aracınızı bize geri satabilir veya takasla model
+              yükseltebilir/düşürebilirsiniz.
+            </p>
+          </div>
+        </div>
+
+        {/* NEDEN GAPSAN OTOMOTİV & HAFTA SONU NOTER */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 bg-white border border-[#E0E4EA] rounded-[10px] p-6 md:p-8 space-y-4">
+            <h3 className="font-heading font-bold text-[22px] text-[#111F35]">
+              Neden GAPSAN Otomotiv? (Kurumsal Hizmet ve Güvence)
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] space-y-1.5">
+                <p className="font-heading font-bold text-[16px] text-[#111F35] flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#D6A948] shrink-0" />
+                  Banka Güvencesi
+                </p>
+                <p className="text-[13px] text-[#536174] leading-relaxed">
+                  Tüm senetli satışlarımız kurumsal altyapı ve banka tasdiki ile
+                  yapılır. Peşinat ve tüm taksitleriniz banka güvencesi
+                  altındadır.
                 </p>
               </div>
-              <Link
-                href="/?alan=otomotiv#talep"
-                className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-[#111F35] hover:underline"
-              >
-                <span>Talep Oluştur</span>
-                <ChevronRight className="w-4 h-4 text-[#D6A948]" />
-              </Link>
+              <div className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] space-y-1.5">
+                <p className="font-heading font-bold text-[16px] text-[#111F35] flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#D6A948] shrink-0" />
+                  Kredi Limitiniz Etkilenmez
+                </p>
+                <p className="text-[13px] text-[#536174] leading-relaxed">
+                  Yaptığınız taksitli alım, mevcut banka kredi limitlerinizi
+                  etkilemez ve kredi sicilinizde (Findeks) görünmez.
+                </p>
+              </div>
+              <div className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] space-y-1.5">
+                <p className="font-heading font-bold text-[16px] text-[#111F35] flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#D6A948] shrink-0" />
+                  Aynı Gün Hızlı Teslimat
+                </p>
+                <p className="text-[13px] text-[#536174] leading-relaxed">
+                  Başvurunuzun onaylandığı aynı gün içerisinde noter devir
+                  işlemleriniz tamamlanır ve aracınız size teslim edilir.
+                </p>
+              </div>
             </div>
-          ))}
+          </div>
+
+          <div className="lg:col-span-4 bg-[#111F35] text-white rounded-[10px] p-6 md:p-8 flex flex-col justify-between gap-4">
+            <div className="space-y-2">
+              <span className="inline-block px-2.5 py-0.5 rounded bg-[#D6A948] text-[#111F35] text-[12px] font-bold">
+                ÇALIŞMA SAATLERİ VE NOTER
+              </span>
+              <h3 className="font-heading font-bold text-[22px] text-white">
+                Hafta Sonu Noter Hizmeti
+              </h3>
+              <p className="text-[14px] text-white/85 leading-relaxed">
+                <strong>Cumartesi ve Pazar günleri</strong> nöbetçi noter satışı
+                yapılmaktadır.
+              </p>
+              <p className="text-[15px] font-semibold text-[#D6A948]">
+                Pazar günleri 11:00 – 17:00 saatleri arasında hizmet
+                vermekteyiz.
+              </p>
+            </div>
+            <a
+              href="tel:+905324284332"
+              className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 rounded-[10px] bg-[#D6A948] text-[#111F35] font-semibold text-[14px]"
+            >
+              <Phone className="w-4 h-4" />
+              <span>WhatsApp &amp; Kredi Hattı: 0532 428 43 32</span>
+            </a>
+          </div>
+        </div>
+
+        {/* FİNANS ORTAKLARIMIZ & FAİZSİZ TASARRUF FİNANSMANI */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-6 space-y-3">
+            <h3 className="font-heading font-bold text-[18px] text-[#111F35]">
+              Güçlü Finans Ortaklarımız (Yetkili Bayi)
+            </h3>
+            <p className="text-[13px] text-[#536174]">
+              Türkiye’nin önde gelen finans kuruluşlarının yetkili bayisi olarak
+              hizmet sunmaktayız:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {FINANCE_PARTNERS.map((partner) => (
+                <span
+                  key={partner}
+                  className="px-3 py-1.5 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] text-[13px] font-semibold text-[#111F35]"
+                >
+                  {partner}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-6 space-y-3">
+            <h3 className="font-heading font-bold text-[18px] text-[#111F35]">
+              Faizsiz Tasarruf Finansmanı ile Satış İmkanı
+            </h3>
+            <p className="text-[13px] text-[#536174]">
+              Tasarruf finansman şirketleri üzerinden araç alım işlemlerinizde
+              tam destek sağlıyoruz:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {SAVINGS_FINANCE_PARTNERS.map((partner) => (
+                <span
+                  key={partner}
+                  className="px-3.5 py-1.5 rounded-[10px] bg-[#111F35] text-[#D6A948] text-[13px] font-bold uppercase"
+                >
+                  {partner}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* İlanlar ve Filtreler */}
       <section
         id="ilanlar"
-        className="gapsan-container pb-14"
+        className="gapsan-container py-8"
         aria-labelledby="ot-ilanlar-heading"
       >
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
@@ -409,7 +668,10 @@ export default function OtomotivClient() {
                     <div>
                       <div className="aspect-[4/3] bg-[#111F35] overflow-hidden">
                         <img
-                          src={car.images[0] || "/assets/gapsan/gapsan-ilan-siluet.png"}
+                          src={
+                            car.images[0] ||
+                            "/assets/gapsan/gapsan-ilan-siluet.png"
+                          }
                           alt={car.title}
                           className="w-full h-full object-cover object-center"
                         />
@@ -422,7 +684,9 @@ export default function OtomotivClient() {
                           {[
                             car.year,
                             car.transmission,
-                            car.km !== null ? `${car.km.toLocaleString("tr-TR")} km` : null,
+                            car.km !== null
+                              ? `${car.km.toLocaleString("tr-TR")} km`
+                              : null,
                           ]
                             .filter(Boolean)
                             .join(" • ")}
@@ -484,8 +748,9 @@ export default function OtomotivClient() {
                         </h4>
                       </div>
                       <p className="text-[14px] text-[#536174]">
-                        {demoVehicle.fuel} &bull; {demoVehicle.transmission} &bull;{" "}
-                        {demoVehicle.trim} &bull; {demoVehicle.horsepower}
+                        {demoVehicle.fuel} &bull; {demoVehicle.transmission}{" "}
+                        &bull; {demoVehicle.trim} &bull;{" "}
+                        {demoVehicle.horsepower}
                       </p>
                       <p className="text-[12px] font-medium text-[#536174]">
                         Yayın onayı bekliyor
@@ -511,6 +776,15 @@ export default function OtomotivClient() {
             </div>
           )}
         </div>
+      </section>
+
+      {/* Otomotiv Resmi Yetki Belgeleri */}
+      <section className="gapsan-container pb-14">
+        <CertificatesGrid
+          filterCategory="otomotiv"
+          title="Otomotiv Yetki ve Mesleki Yeterlilik Belgelerimiz"
+          subtitle="T.C. İstanbul Valiliği İkinci El Motorlu Kara Taşıtı Ticareti Yetki Belgesi (No: 3406225), Seviye 5 Mesleki Yeterlilik ve Oto Alım Satım Eğitimi Sertifikalarımız"
+        />
       </section>
     </div>
   );

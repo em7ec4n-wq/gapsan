@@ -161,7 +161,7 @@ export default function Header() {
               </div>
             </div>
 
-            <div className="pt-6 border-t border-[#E0E4EA] space-y-2 text-[14px] text-[#536174]">
+            <div className="pt-6 border-t border-[#E0E4EA] space-y-3 text-[14px] text-[#536174]">
               <p className="font-semibold text-[#111F35]">Hızlı İletişim</p>
               <a
                 href={contact.generalPhoneTel}
@@ -170,7 +170,60 @@ export default function Header() {
                 <Phone className="w-4 h-4 text-[#D6A948]" aria-hidden="true" />
                 Genel: {contact.generalPhoneDisplay}
               </a>
-              <p className="text-[12px] leading-relaxed">
+              <div className="pt-2 space-y-2">
+                <p className="text-[12px] font-semibold text-[#111F35]">Sosyal Medya &amp; Kanal:</p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <a
+                    href={contact.socialMedia.instagramOtomotiv}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-[8px] bg-[#F7F5EF] border border-[#E0E4EA] text-[11px] font-semibold text-[#111F35] hover:bg-[#D6A948]"
+                  >
+                    Oto Instagram
+                  </a>
+                  <a
+                    href={contact.socialMedia.tiktokOtomotiv}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-[8px] bg-[#F7F5EF] border border-[#E0E4EA] text-[11px] font-semibold text-[#111F35] hover:bg-[#D6A948]"
+                  >
+                    Oto TikTok
+                  </a>
+                  <a
+                    href={contact.socialMedia.instagramGayrimenkul}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-[8px] bg-[#F7F5EF] border border-[#E0E4EA] text-[11px] font-semibold text-[#111F35] hover:bg-[#D6A948]"
+                  >
+                    Emlak Instagram
+                  </a>
+                  <a
+                    href={contact.socialMedia.tiktokGayrimenkul}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-[8px] bg-[#F7F5EF] border border-[#E0E4EA] text-[11px] font-semibold text-[#111F35] hover:bg-[#D6A948]"
+                  >
+                    Emlak TikTok
+                  </a>
+                  <a
+                    href={contact.socialMedia.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-[8px] bg-[#F7F5EF] border border-[#E0E4EA] text-[11px] font-semibold text-[#111F35] hover:bg-[#D6A948]"
+                  >
+                    Facebook
+                  </a>
+                </div>
+                <a
+                  href={contact.socialMedia.whatsappChannel}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-[8px] bg-[#111F35] text-white text-[12px] font-semibold hover:bg-[#1b2e4b]"
+                >
+                  <span>WhatsApp Kanalını Takip Edin</span>
+                </a>
+              </div>
+              <p className="text-[12px] leading-relaxed pt-1">
                 {contact.address}
               </p>
             </div>

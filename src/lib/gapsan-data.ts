@@ -85,14 +85,37 @@ export interface HeroSlideConfig {
   conceptLabel: string;
 }
 
+export interface OfficialCertificate {
+  id: string;
+  title: string;
+  subtitle: string;
+  documentNo: string;
+  dateInfo: string;
+  category: "otomotiv" | "gayrimenkul" | "kurumsal";
+  previewImage: string;
+  fileUrl: string;
+  isPdf: boolean;
+}
+
 export interface ContactConfig {
   companyLegalName: string;
+  mersisNo: string;
+  otomotivYetkiBelgeNo: string;
+  tasinmazYetkiBelgeNo: string;
   address: string;
   mapsDirectionsUrl: string;
   generalPhoneDisplay: string;
   generalPhoneTel: string;
   generalEmail: string;
   insuranceEmail: string;
+  socialMedia: {
+    facebook: string;
+    instagramOtomotiv: string;
+    instagramGayrimenkul: string;
+    tiktokOtomotiv: string;
+    tiktokGayrimenkul: string;
+    whatsappChannel: string;
+  };
   units: {
     otomotiv: {
       phoneDisplay: string;
@@ -118,26 +141,43 @@ export interface ContactConfig {
 export const SITE_URL = "https://gapsansirketlergrubu.com";
 
 export const CONTACT_CONFIG: ContactConfig = {
-  companyLegalName: "GAPSAN EML. İNŞ. OTOMOTİV SAN. VE TİC. LTD. ŞTİ.",
-  address: "Üçevler, 906. Sk. No:1/A, Esenyurt/İstanbul",
+  companyLegalName:
+    "GAPSAN EMLAK İNŞAAT OTOMOTİV SANAYİ VE TİCARET LİMİTED ŞİRKETİ",
+  mersisNo: "0389188848300001",
+  otomotivYetkiBelgeNo: "3406225",
+  tasinmazYetkiBelgeNo: "3410913",
+  address: "Üçevler Mah. 906. Sk. Yeşil Alan Sitesi No:1/A, Esenyurt/İstanbul",
   mapsDirectionsUrl:
     "https://www.google.com/maps/dir/?api=1&destination=%C3%9C%C3%A7evler%2C%20906.%20Sk.%20No%3A1%2FA%2C%20Esenyurt%2F%C4%B0stanbul",
   generalPhoneDisplay: "0212 596 60 00",
   generalPhoneTel: "tel:+902125966000",
   generalEmail: "info@gapsansirketlergrubu.com",
   insuranceEmail: "gapsan@outlook.com",
+  socialMedia: {
+    facebook: "https://www.facebook.com/share/1EJ9CaU444/?mibextid=wwXlfr",
+    instagramOtomotiv:
+      "https://www.instagram.com/gapsanotomotiv?avpt=MWhvM2k0cnBrODlzaA%3D%3D&utm_source=qr",
+    instagramGayrimenkul:
+      "https://www.instagram.com/gapsangayrimenkul?knvt=NzhtY3dvbGYwdDY0&utm_source=qr",
+    tiktokOtomotiv:
+      "https://www.tiktok.com/@gapsanotomotiv?_r=1&_t=ZS-9BWvcauVHiW",
+    tiktokGayrimenkul:
+      "https://www.tiktok.com/@gapsangayrimenkul?_r=1&_t=ZS-9BWvfjFnFgb",
+    whatsappChannel:
+      "https://whatsapp.com/channel/0029VbDGBEN0AgWJEM4whn1Q",
+  },
   units: {
     otomotiv: {
       phoneDisplay: "0532 428 43 32",
       phoneTel: "tel:+905324284332",
       whatsappNumber: "905324284332",
-      whatsappApproved: false,
+      whatsappApproved: true,
     },
     gayrimenkul: {
       phoneDisplay: "0535 053 88 04",
       phoneTel: "tel:+905350538804",
       whatsappNumber: "905350538804",
-      whatsappApproved: false,
+      whatsappApproved: true,
     },
     sigorta: {
       phoneDisplay: "0533 059 88 04",
@@ -148,13 +188,129 @@ export const CONTACT_CONFIG: ContactConfig = {
   },
 };
 
+export const OFFICIAL_CERTIFICATES: OfficialCertificate[] = [
+  {
+    id: "cert-otomotiv-yetki",
+    title: "İkinci El Motorlu Kara Taşıtı Ticareti Yetki Belgesi",
+    subtitle: "T.C. İstanbul Valiliği Ticaret İl Müdürlüğü",
+    documentNo: "Yetki Belge No: 3406225 • MERSİS: 0389188848300001",
+    dateInfo: "Düzenlenme Tarihi: 29.08.2024",
+    category: "otomotiv",
+    previewImage: "/assets/gapsan/belgeler/otomotiv-yetki-belgesi.pdf.png",
+    fileUrl: "/assets/gapsan/belgeler/otomotiv-yetki-belgesi.pdf",
+    isPdf: true,
+  },
+  {
+    id: "cert-tasinmaz-yetki",
+    title: "Taşınmaz Ticareti Yetki Belgesi",
+    subtitle: "T.C. İstanbul Valiliği Ticaret İl Müdürlüğü",
+    documentNo: "Yetki Belge No: 3410913 • MERSİS: 0389188848300001",
+    dateInfo: "Düzenlenme Tarihi: 15.05.2024",
+    category: "gayrimenkul",
+    previewImage: "/assets/gapsan/belgeler/tasinmaz-yetki-belgesi.pdf.png",
+    fileUrl: "/assets/gapsan/belgeler/tasinmaz-yetki-belgesi.pdf",
+    isPdf: true,
+  },
+  {
+    id: "cert-otomotiv-seviye5",
+    title: "Motorlu Kara Taşıtları Alım Satım Sorumlusu (Seviye 5)",
+    subtitle: "MASFED MYM Mesleki Yeterlilik Belgesi — Harun ŞAN",
+    documentNo: "Belge No: YB0108/17UY0299-5/00/13886",
+    dateInfo: "TÜRKAK & MYK Akrediteli",
+    category: "otomotiv",
+    previewImage: "/assets/gapsan/belgeler/otomotiv-seviye-5.jpg",
+    fileUrl: "/assets/gapsan/belgeler/otomotiv-seviye-5.jpg",
+    isPdf: false,
+  },
+  {
+    id: "cert-emlak-seviye5",
+    title: "Sorumlu Emlak Danışmanı (Seviye 5)",
+    subtitle: "FSM Belgelendirme Mesleki Yeterlilik Belgesi — Harun ŞAN",
+    documentNo: "Belge No: YB0157/17UY0333-5/00/8308",
+    dateInfo: "Geçerlilik: 03.03.2023 – 02.03.2028",
+    category: "gayrimenkul",
+    previewImage: "/assets/gapsan/belgeler/emlak-seviye-5.jpg",
+    fileUrl: "/assets/gapsan/belgeler/emlak-seviye-5.jpg",
+    isPdf: false,
+  },
+  {
+    id: "cert-otomotiv-egitim",
+    title: "Oto Alım Satım Eğitimi Kurs Bitirme Belgesi (120 Saat)",
+    subtitle: "Fatih Sultan Mehmet Vakıf Üniversitesi Sürekli Eğitim Merkezi",
+    documentNo: "Barkod No: UN_041054206652741583175 — Harun ŞAN",
+    dateInfo: "Tanzim Tarihi: 15.02.2023",
+    category: "otomotiv",
+    previewImage: "/assets/gapsan/belgeler/otomotiv-egitim-belgesi.pdf.png",
+    fileUrl: "/assets/gapsan/belgeler/otomotiv-egitim-belgesi.pdf",
+    isPdf: true,
+  },
+  {
+    id: "cert-emlak-egitim",
+    title: "Emlak Danışmanlığı Eğitimi Kurs Bitirme Belgesi (120 Saat)",
+    subtitle: "Fatih Sultan Mehmet Vakıf Üniversitesi Sürekli Eğitim Merkezi",
+    documentNo: "Barkod No: UN_041054206652741581677 — Harun ŞAN",
+    dateInfo: "Tanzim Tarihi: 15.02.2023",
+    category: "gayrimenkul",
+    previewImage: "/assets/gapsan/belgeler/emlak-egitim-belgesi.pdf.png",
+    fileUrl: "/assets/gapsan/belgeler/emlak-egitim-belgesi.pdf",
+    isPdf: true,
+  },
+];
+
+export const FINANCE_PARTNERS = [
+  "ALJ Finans",
+  "Koç Finans",
+  "Aktif Bank",
+  "TEB Cetelem",
+  "Burgan Bank",
+  "Türkiye Finans",
+  "Yapı Kredi",
+] as const;
+
+export const SAVINGS_FINANCE_PARTNERS = [
+  "Birevim",
+  "Katılımevim",
+  "FuzulEv",
+  "Birikimevim",
+] as const;
+
+export const INSURANCE_PARTNERS = [
+  "AXA Sigorta",
+  "Anadolu Sigorta",
+  "AKSigorta",
+  "Allianz",
+  "Quick Sigorta",
+  "Zurich Sigorta",
+  "Türkiye Sigorta",
+  "Sompo Sigorta",
+  "Prive Sigorta",
+  "Ray Sigorta",
+  "AcnTURK Sigorta",
+  "Unico Sigorta",
+  "Türk Nippon Sigorta",
+  "Acıbadem Sigorta",
+  "Arex Sigorta",
+  "Aveon Sigorta",
+  "Demir Sigorta",
+  "Corpus Sigorta",
+  "Generali Sigorta",
+  "Hepiyi Sigorta",
+  "Neova Sigorta",
+  "Orient Sigorta",
+  "Magdeburger Sigorta",
+  "HDI Sigorta",
+  "Atlas Mutuel Sigorta",
+  "Koru Sigorta",
+  "Ankara Sigorta",
+] as const;
+
 export const INITIAL_HERO_SLIDES: HeroSlideConfig[] = [
   {
     id: "slide-1",
     image: "/assets/gapsan/gapsan-otomotiv-konsept.webp",
     alt: "Gapşan Otomotiv galeri konsept görseli",
     heading: "Otomotiv, gayrimenkul ve sigorta",
-    location: "Esenyurt, İstanbul",
+    location: "Esenyurt, İstanbul • 2010'dan Bu Yana Güvenle",
     ctaLabel: "Talep Oluştur",
     ctaHref: "/#talep",
     desktopFocus: "72% 55%",
@@ -185,10 +341,6 @@ export const INITIAL_HERO_SLIDES: HeroSlideConfig[] = [
   },
 ];
 
-/**
- * Separate demo dataset for the featured Passat record.
- * Price, km, damage, and stock details remain locked until publication approval.
- */
 export const DEMO_VEHICLE_LISTING: VehicleListing = {
   id: "demo-passat-1347951505",
   slug: "2017-volkswagen-passat-1347951505",
@@ -221,13 +373,19 @@ export const INITIAL_REAL_ESTATE_LISTINGS: RealEstateListing[] = [];
 export const INITIAL_CONSTRUCTION_PROJECTS: ConstructionProject[] = [];
 export const INITIAL_REVIEWS: CustomerReview[] = [];
 
-export const APPROVED_INSURANCE_TYPES = ["Trafik", "Kasko", "Sağlık"] as const;
+export const APPROVED_INSURANCE_TYPES = [
+  "Trafik",
+  "Kasko",
+  "DASK (DSK)",
+  "Sağlık",
+] as const;
 export type InsuranceType = (typeof APPROVED_INSURANCE_TYPES)[number];
 
 export const VEHICLE_REQUEST_TYPES = [
   "Araç alımı",
   "Araç satışı",
   "Takas",
+  "Senetli / Kredili Araç Başvurusu",
 ] as const;
 export type VehicleRequestType = (typeof VEHICLE_REQUEST_TYPES)[number];
 
