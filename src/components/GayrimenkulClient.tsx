@@ -186,8 +186,11 @@ export default function GayrimenkulClient() {
             </p>
             <p className="text-[13px] font-semibold text-[#111F35] flex items-center gap-1.5 pt-1">
               <CheckCircle2 className="w-4 h-4 text-[#D6A948]" />
-              Taşınmaz Ticareti Yetki Belgesi No: 3410913 &bull; İletişim:{" "}
-              {contact.units.gayrimenkul.phoneDisplay}
+              Taşınmaz Ticareti Yetki Belge No: 3410913 &bull; Tel:{" "}
+              {contact.units.gayrimenkul.phoneDisplay} &bull; E-Posta:{" "}
+              <a href={`mailto:${contact.gayrimenkulEmail}`} className="underline hover:text-[#D6A948]">
+                {contact.gayrimenkulEmail}
+              </a>
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 shrink-0">

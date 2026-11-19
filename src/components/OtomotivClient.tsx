@@ -438,13 +438,24 @@ export default function OtomotivClient() {
                 vermekteyiz.
               </p>
             </div>
-            <a
-              href="tel:+905324284332"
-              className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 rounded-[10px] bg-[#D6A948] text-[#111F35] font-semibold text-[14px]"
-            >
-              <Phone className="w-4 h-4" />
-              <span>WhatsApp &amp; Kredi Hattı: 0532 428 43 32</span>
-            </a>
+            <div className="flex flex-col gap-2 w-full">
+              <a
+                href="tel:+905324284332"
+                className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 rounded-[10px] bg-[#D6A948] text-[#111F35] font-semibold text-[14px]"
+              >
+                <Phone className="w-4 h-4" />
+                <span>WhatsApp &amp; Kredi Hattı: 0532 428 43 32</span>
+              </a>
+              <p className="text-center text-[12px] text-white/80">
+                Otomotiv E-Posta:{" "}
+                <a
+                  href={`mailto:${contact.otomotivEmail}`}
+                  className="underline hover:text-[#D6A948]"
+                >
+                  {contact.otomotivEmail}
+                </a>
+              </p>
+            </div>
           </div>
         </div>
 

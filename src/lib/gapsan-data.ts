@@ -110,6 +110,14 @@ export interface ContactConfig {
   generalPhoneTel: string;
   generalEmail: string;
   insuranceEmail: string;
+  otomotivEmail: string;
+  gayrimenkulEmail: string;
+  emails: {
+    general: string;
+    sigorta: string;
+    otomotiv: string;
+    gayrimenkul: string;
+  };
   socialMedia: {
     facebook: string;
     instagramOtomotiv: string;
@@ -124,18 +132,21 @@ export interface ContactConfig {
       phoneTel: string;
       whatsappNumber: string;
       whatsappApproved: boolean;
+      email: string;
     };
     gayrimenkul: {
       phoneDisplay: string;
       phoneTel: string;
       whatsappNumber: string;
       whatsappApproved: boolean;
+      email: string;
     };
     sigorta: {
       phoneDisplay: string;
       phoneTel: string;
       whatsappNumber: string;
       whatsappApproved: boolean;
+      email: string;
     };
   };
 }
@@ -155,8 +166,16 @@ export const CONTACT_CONFIG: ContactConfig = {
     "https://www.google.com/maps/dir/?api=1&destination=%C3%9C%C3%A7evler%2C%20906.%20Sk.%20No%3A1%2FA%2C%20Esenyurt%2F%C4%B0stanbul",
   generalPhoneDisplay: "0212 596 60 00",
   generalPhoneTel: "tel:+902125966000",
-  generalEmail: "info@gapsansirketlergrubu.com",
-  insuranceEmail: "gapsan@outlook.com.tr",
+  generalEmail: "gapsan@outlook.com.tr",
+  insuranceEmail: "gapsansigorta@hotmail.com",
+  otomotivEmail: "gapsanotomotiv@hotmail.com",
+  gayrimenkulEmail: "gapsangayrimenkul@hotmail.com",
+  emails: {
+    general: "gapsan@outlook.com.tr",
+    sigorta: "gapsansigorta@hotmail.com",
+    otomotiv: "gapsanotomotiv@hotmail.com",
+    gayrimenkul: "gapsangayrimenkul@hotmail.com",
+  },
   socialMedia: {
     facebook: "https://www.facebook.com/share/1EJ9CaU444/?mibextid=wwXlfr",
     instagramOtomotiv:
@@ -176,18 +195,21 @@ export const CONTACT_CONFIG: ContactConfig = {
       phoneTel: "tel:+905324284332",
       whatsappNumber: "905324284332",
       whatsappApproved: true,
+      email: "gapsanotomotiv@hotmail.com",
     },
     gayrimenkul: {
       phoneDisplay: "0535 053 88 04",
       phoneTel: "tel:+905350538804",
       whatsappNumber: "905350538804",
       whatsappApproved: true,
+      email: "gapsangayrimenkul@hotmail.com",
     },
     sigorta: {
       phoneDisplay: "0533 059 88 04",
       phoneTel: "tel:+905330598804",
       whatsappNumber: "905330598804",
       whatsappApproved: true,
+      email: "gapsansigorta@hotmail.com",
     },
   },
 };

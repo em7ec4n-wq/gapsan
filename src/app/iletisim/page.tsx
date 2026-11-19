@@ -62,42 +62,64 @@ export default function IletisimPage() {
 
             <div className="flex items-start gap-3">
               <Mail className="w-5 h-5 text-[#D6A948] mt-1 shrink-0" />
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <h2 className="font-heading font-bold text-[19px] text-[#111F35]">
-                  E-Posta ve Kurumsal Web
+                  Kurumsal E-Posta Adreslerimiz
                 </h2>
-                <p className="text-[15px] text-[#536174]">
-                  E-Posta:{" "}
-                  <a
-                    href={`mailto:${CONTACT_CONFIG.insuranceEmail}`}
-                    className="font-bold text-[#111F35] hover:underline"
-                  >
-                    {CONTACT_CONFIG.insuranceEmail}
-                  </a>
-                </p>
-                <p className="text-[15px] text-[#536174]">
-                  Genel Bilgi:{" "}
-                  <a
-                    href={`mailto:${CONTACT_CONFIG.generalEmail}`}
-                    className="font-semibold text-[#111F35] hover:underline"
-                  >
-                    {CONTACT_CONFIG.generalEmail}
-                  </a>
-                </p>
-                <p className="text-[15px] text-[#536174]">
-                  Web Sitesi:{" "}
-                  <a
-                    href={CONTACT_CONFIG.officialWebsiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold text-[#111F35] hover:underline"
-                  >
-                    {CONTACT_CONFIG.officialWebsiteUrl.replace("https://", "").replace("/", "")}
-                  </a>
-                </p>
-                <p className="text-[13px] text-[#536174] pt-1">
-                  Şirket Müdürü / Yetkilisi: <strong className="text-[#111F35]">{CONTACT_CONFIG.founderName}</strong>
-                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[14px]">
+                  <p className="text-[#536174]">
+                    <span className="font-semibold text-[#111F35] block text-[12px] uppercase">Genel / Kurumsal:</span>
+                    <a
+                      href={`mailto:${CONTACT_CONFIG.generalEmail}`}
+                      className="font-bold text-[#111F35] hover:underline"
+                    >
+                      {CONTACT_CONFIG.generalEmail}
+                    </a>
+                  </p>
+                  <p className="text-[#536174]">
+                    <span className="font-semibold text-[#111F35] block text-[12px] uppercase">Sigorta Birimi:</span>
+                    <a
+                      href={`mailto:${CONTACT_CONFIG.insuranceEmail}`}
+                      className="font-bold text-[#111F35] hover:underline"
+                    >
+                      {CONTACT_CONFIG.insuranceEmail}
+                    </a>
+                  </p>
+                  <p className="text-[#536174]">
+                    <span className="font-semibold text-[#111F35] block text-[12px] uppercase">Otomotiv Birimi:</span>
+                    <a
+                      href={`mailto:${CONTACT_CONFIG.otomotivEmail}`}
+                      className="font-bold text-[#111F35] hover:underline"
+                    >
+                      {CONTACT_CONFIG.otomotivEmail}
+                    </a>
+                  </p>
+                  <p className="text-[#536174]">
+                    <span className="font-semibold text-[#111F35] block text-[12px] uppercase">Gayrimenkul Birimi:</span>
+                    <a
+                      href={`mailto:${CONTACT_CONFIG.gayrimenkulEmail}`}
+                      className="font-bold text-[#111F35] hover:underline"
+                    >
+                      {CONTACT_CONFIG.gayrimenkulEmail}
+                    </a>
+                  </p>
+                </div>
+                <div className="pt-2 text-[14px] text-[#536174] border-t border-[#E0E4EA] mt-2">
+                  <p>
+                    Resmi Web:{" "}
+                    <a
+                      href={CONTACT_CONFIG.officialWebsiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-[#111F35] hover:underline"
+                    >
+                      {CONTACT_CONFIG.officialWebsiteUrl.replace("https://", "").replace("/", "")}
+                    </a>
+                  </p>
+                  <p className="text-[13px] pt-0.5">
+                    Şirket Müdürü / Yetkilisi: <strong className="text-[#111F35]">{CONTACT_CONFIG.founderName}</strong>
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -252,57 +274,77 @@ export default function IletisimPage() {
               Onaylanmış Birim Hatları
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <a
-                href={CONTACT_CONFIG.generalPhoneTel}
-                className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors"
-              >
-                <p className="text-[12px] font-semibold text-[#536174]">
-                  Genel Arama
+              <div className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors flex flex-col justify-between">
+                <div>
+                  <p className="text-[12px] font-semibold text-[#536174]">
+                    Genel Arama &amp; Merkez
+                  </p>
+                  <a
+                    href={CONTACT_CONFIG.generalPhoneTel}
+                    className="mt-1 font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2 hover:underline"
+                  >
+                    <Phone className="w-4 h-4 text-[#D6A948]" />
+                    {CONTACT_CONFIG.generalPhoneDisplay}
+                  </a>
+                </div>
+                <p className="mt-2 text-[12px] text-[#536174] border-t border-[#E0E4EA]/60 pt-1.5 truncate">
+                  E-Posta: <a href={`mailto:${CONTACT_CONFIG.generalEmail}`} className="font-semibold text-[#111F35] hover:underline">{CONTACT_CONFIG.generalEmail}</a>
                 </p>
-                <p className="mt-1 font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-[#D6A948]" />
-                  {CONTACT_CONFIG.generalPhoneDisplay}
-                </p>
-              </a>
+              </div>
 
-              <a
-                href={CONTACT_CONFIG.units.otomotiv.phoneTel}
-                className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors"
-              >
-                <p className="text-[12px] font-semibold text-[#536174]">
-                  Otomotiv &amp; Kredi Hattı
+              <div className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors flex flex-col justify-between">
+                <div>
+                  <p className="text-[12px] font-semibold text-[#536174]">
+                    Otomotiv &amp; Kredi Hattı
+                  </p>
+                  <a
+                    href={CONTACT_CONFIG.units.otomotiv.phoneTel}
+                    className="mt-1 font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2 hover:underline"
+                  >
+                    <Phone className="w-4 h-4 text-[#D6A948]" />
+                    {CONTACT_CONFIG.units.otomotiv.phoneDisplay}
+                  </a>
+                </div>
+                <p className="mt-2 text-[12px] text-[#536174] border-t border-[#E0E4EA]/60 pt-1.5 truncate">
+                  E-Posta: <a href={`mailto:${CONTACT_CONFIG.otomotivEmail}`} className="font-semibold text-[#111F35] hover:underline">{CONTACT_CONFIG.otomotivEmail}</a>
                 </p>
-                <p className="mt-1 font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-[#D6A948]" />
-                  {CONTACT_CONFIG.units.otomotiv.phoneDisplay}
-                </p>
-              </a>
+              </div>
 
-              <a
-                href={CONTACT_CONFIG.units.gayrimenkul.phoneTel}
-                className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors"
-              >
-                <p className="text-[12px] font-semibold text-[#536174]">
-                  Gayrimenkul Birimi
+              <div className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors flex flex-col justify-between">
+                <div>
+                  <p className="text-[12px] font-semibold text-[#536174]">
+                    Gayrimenkul Birimi
+                  </p>
+                  <a
+                    href={CONTACT_CONFIG.units.gayrimenkul.phoneTel}
+                    className="mt-1 font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2 hover:underline"
+                  >
+                    <Phone className="w-4 h-4 text-[#D6A948]" />
+                    {CONTACT_CONFIG.units.gayrimenkul.phoneDisplay}
+                  </a>
+                </div>
+                <p className="mt-2 text-[12px] text-[#536174] border-t border-[#E0E4EA]/60 pt-1.5 truncate">
+                  E-Posta: <a href={`mailto:${CONTACT_CONFIG.gayrimenkulEmail}`} className="font-semibold text-[#111F35] hover:underline">{CONTACT_CONFIG.gayrimenkulEmail}</a>
                 </p>
-                <p className="mt-1 font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-[#D6A948]" />
-                  {CONTACT_CONFIG.units.gayrimenkul.phoneDisplay}
-                </p>
-              </a>
+              </div>
 
-              <a
-                href={CONTACT_CONFIG.units.sigorta.phoneTel}
-                className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors"
-              >
-                <p className="text-[12px] font-semibold text-[#536174]">
-                  Sigorta Birimi (7/24)
+              <div className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors flex flex-col justify-between">
+                <div>
+                  <p className="text-[12px] font-semibold text-[#536174]">
+                    Sigorta Birimi (7/24)
+                  </p>
+                  <a
+                    href={CONTACT_CONFIG.units.sigorta.phoneTel}
+                    className="mt-1 font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2 hover:underline"
+                  >
+                    <Phone className="w-4 h-4 text-[#D6A948]" />
+                    {CONTACT_CONFIG.units.sigorta.phoneDisplay}
+                  </a>
+                </div>
+                <p className="mt-2 text-[12px] text-[#536174] border-t border-[#E0E4EA]/60 pt-1.5 truncate">
+                  E-Posta: <a href={`mailto:${CONTACT_CONFIG.insuranceEmail}`} className="font-semibold text-[#111F35] hover:underline">{CONTACT_CONFIG.insuranceEmail}</a>
                 </p>
-                <p className="mt-1 font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-[#D6A948]" />
-                  {CONTACT_CONFIG.units.sigorta.phoneDisplay}
-                </p>
-              </a>
+              </div>
             </div>
           </div>
 
