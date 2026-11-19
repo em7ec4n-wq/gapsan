@@ -70,7 +70,7 @@ export default function RootLayout({
     email: CONTACT_CONFIG.generalEmail,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Üçevler, 906. Sk. No:1/A",
+      streetAddress: "Üçevler Mah. 906. Sk. No:1/A",
       addressLocality: "Esenyurt",
       addressRegion: "İstanbul",
       addressCountry: "TR",

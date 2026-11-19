@@ -161,9 +161,9 @@ export const CONTACT_CONFIG: ContactConfig = {
   mersisNo: "0389188848300001",
   otomotivYetkiBelgeNo: "3406225",
   tasinmazYetkiBelgeNo: "3410913",
-  address: "Üçevler Mah. 906. Sk. Yeşil Alan Sitesi No:1/A, Esenyurt/İstanbul",
+  address: "Üçevler Mah. 906. Sk. No:1/A, Esenyurt/İstanbul",
   mapsDirectionsUrl:
-    "https://www.google.com/maps/dir/?api=1&destination=%C3%9C%C3%A7evler%2C%20906.%20Sk.%20No%3A1%2FA%2C%20Esenyurt%2F%C4%B0stanbul",
+    "https://www.google.com/maps/dir/?api=1&destination=%C3%9C%C3%A7evler%20Mah.%20906.%20Sk.%20No%3A1%2FA%2C%20Esenyurt%2F%C4%B0stanbul",
   generalPhoneDisplay: "0212 596 60 00",
   generalPhoneTel: "tel:+902125966000",
   generalEmail: "gapsan@outlook.com.tr",
