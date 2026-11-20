@@ -36,6 +36,7 @@ import {
   DEFAULT_EXPERTISE_REPORT,
   VEHICLE_FEATURES_LIST,
   REAL_ESTATE_FEATURES_LIST,
+  getPartStatusOptions,
 } from "@/lib/gapsan-data";
 
 type AdminRole = "Düzenleyici" | "Yayıncı";
@@ -43,20 +44,15 @@ type AdminTab = "arac" | "gayrimenkul" | "slayt" | "yorum" | "ayarlar";
 
 const DEMO_PINS = ["1998", "gapsan1998", "gapsan"];
 
-const EXPERTISE_STATUSES: ExpertiseStatus[] = [
-  "Orijinal",
-  "Lokal Boyalı",
-  "Boyalı",
-  "Değişen",
-  "İşlemli",
-];
-
 const EXPERTISE_COLOR_MAP: Record<ExpertiseStatus, string> = {
   Orijinal: "bg-emerald-50 text-emerald-800 border-emerald-300",
   "Lokal Boyalı": "bg-amber-50 text-amber-800 border-amber-300",
   Boyalı: "bg-orange-50 text-orange-800 border-orange-300",
   Değişen: "bg-red-50 text-red-800 border-red-300",
   İşlemli: "bg-purple-50 text-purple-800 border-purple-300",
+  Açılmış: "bg-rose-50 text-rose-800 border-rose-300",
+  Dirençli: "bg-red-50 text-red-800 border-red-300",
+  Düzeltilmiş: "bg-amber-50 text-amber-800 border-amber-300",
 };
 
 /** Client-side image compressor so multiple phone photos upload fast & crisp */
@@ -1233,7 +1229,7 @@ export default function YonetimClient() {
                           }
                           className="text-[11px] font-extrabold bg-white text-[#111F35] px-2 py-0.5 rounded border border-black/15 cursor-pointer shadow-xs"
                         >
-                          {EXPERTISE_STATUSES.map((st) => (
+                          {getPartStatusOptions(part.key).map((st) => (
                             <option key={st} value={st}>
                               {st}
                             </option>
@@ -1272,7 +1268,7 @@ export default function YonetimClient() {
                           }
                           className="text-[11px] font-bold bg-white/90 text-[#111F35] px-1.5 py-0.5 rounded border border-black/10 cursor-pointer"
                         >
-                          {EXPERTISE_STATUSES.map((st) => (
+                          {getPartStatusOptions(part.key).map((st) => (
                             <option key={st} value={st}>
                               {st}
                             </option>
@@ -2918,7 +2914,7 @@ export default function YonetimClient() {
                               }
                               className="text-[11px] font-extrabold bg-white text-[#111F35] px-1 py-0.5 rounded border border-black/10"
                             >
-                              {EXPERTISE_STATUSES.map((st) => (
+                              {getPartStatusOptions(part.key).map((st) => (
                                 <option key={st} value={st}>
                                   {st}
                                 </option>
@@ -2961,7 +2957,7 @@ export default function YonetimClient() {
                               }
                               className="text-[11px] font-bold bg-white text-[#111F35] px-1 py-0.5 rounded border border-black/10"
                             >
-                              {EXPERTISE_STATUSES.map((st) => (
+                              {getPartStatusOptions(part.key).map((st) => (
                                 <option key={st} value={st}>
                                   {st}
                                 </option>

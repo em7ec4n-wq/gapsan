@@ -7,7 +7,20 @@ export type ExpertiseStatus =
   | "Lokal Boyalı"
   | "Boyalı"
   | "Değişen"
-  | "İşlemli";
+  | "İşlemli"
+  | "Açılmış"
+  | "Dirençli"
+  | "Düzeltilmiş";
+
+export function getPartStatusOptions(partKey: string): ExpertiseStatus[] {
+  if (partKey === "airbag") {
+    return ["Orijinal", "İşlemli", "Açılmış", "Dirençli", "Değişen"];
+  }
+  if (partKey.toLowerCase().includes("sase")) {
+    return ["Orijinal", "İşlemli", "Düzeltilmiş", "Boyalı", "Değişen"];
+  }
+  return ["Orijinal", "Lokal Boyalı", "Boyalı", "Değişen"];
+}
 
 export const VEHICLE_PARTS = [
   { key: "kaput", label: "Motor Kaputu", category: "kaporta" },

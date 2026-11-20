@@ -22,6 +22,9 @@ const STATUS_BADGE_STYLES: Record<ExpertiseStatus, string> = {
   Boyalı: "bg-orange-50 text-orange-800 border-orange-200",
   Değişen: "bg-red-50 text-red-800 border-red-200",
   İşlemli: "bg-purple-50 text-purple-800 border-purple-200",
+  Açılmış: "bg-rose-50 text-rose-800 border-rose-300",
+  Dirençli: "bg-red-50 text-red-800 border-red-300",
+  Düzeltilmiş: "bg-amber-50 text-amber-800 border-amber-300",
 };
 
 const STATUS_DOT_STYLES: Record<ExpertiseStatus, string> = {
@@ -30,6 +33,9 @@ const STATUS_DOT_STYLES: Record<ExpertiseStatus, string> = {
   Boyalı: "bg-orange-500",
   Değişen: "bg-red-600",
   İşlemli: "bg-purple-600",
+  Açılmış: "bg-rose-600",
+  Dirençli: "bg-red-600",
+  Düzeltilmiş: "bg-amber-600",
 };
 
 export default function OtomotivDetailClient({ slug }: { slug: string }) {
