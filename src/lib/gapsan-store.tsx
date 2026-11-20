@@ -140,18 +140,47 @@ export function GapsanStoreProvider({
         if (Array.isArray(parsed.reviews)) setReviews(parsed.reviews);
 
         if (parsed.contact) {
-          setContact({
+          const mergedContact: ContactConfig = {
             ...CONTACT_CONFIG,
             ...parsed.contact,
-            address: CONTACT_CONFIG.address,
-            generalEmail: CONTACT_CONFIG.generalEmail,
-            insuranceEmail: CONTACT_CONFIG.insuranceEmail,
-            otomotivEmail: CONTACT_CONFIG.otomotivEmail,
-            gayrimenkulEmail: CONTACT_CONFIG.gayrimenkulEmail,
-            emails: CONTACT_CONFIG.emails,
-            socialMedia: CONTACT_CONFIG.socialMedia,
-            units: CONTACT_CONFIG.units,
-          });
+            address:
+              parsed.contact.address && !parsed.contact.address.includes("Yeşil Alan")
+                ? parsed.contact.address
+                : CONTACT_CONFIG.address,
+            generalEmail:
+              parsed.contact.generalEmail && !parsed.contact.generalEmail.includes("gapsansirketler")
+                ? parsed.contact.generalEmail
+                : CONTACT_CONFIG.generalEmail,
+            insuranceEmail:
+              parsed.contact.insuranceEmail || CONTACT_CONFIG.insuranceEmail,
+            otomotivEmail:
+              parsed.contact.otomotivEmail || CONTACT_CONFIG.otomotivEmail,
+            gayrimenkulEmail:
+              parsed.contact.gayrimenkulEmail || CONTACT_CONFIG.gayrimenkulEmail,
+            emails: {
+              ...CONTACT_CONFIG.emails,
+              ...(parsed.contact.emails || {}),
+            },
+            socialMedia: {
+              ...CONTACT_CONFIG.socialMedia,
+              ...(parsed.contact.socialMedia || {}),
+            },
+            units: {
+              otomotiv: {
+                ...CONTACT_CONFIG.units.otomotiv,
+                ...(parsed.contact.units?.otomotiv || {}),
+              },
+              gayrimenkul: {
+                ...CONTACT_CONFIG.units.gayrimenkul,
+                ...(parsed.contact.units?.gayrimenkul || {}),
+              },
+              sigorta: {
+                ...CONTACT_CONFIG.units.sigorta,
+                ...(parsed.contact.units?.sigorta || {}),
+              },
+            },
+          };
+          setContact(mergedContact);
         }
 
         if (typeof parsed.constructionApprovedScope === "string")

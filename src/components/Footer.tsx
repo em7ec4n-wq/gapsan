@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Lock } from "lucide-react";
 import { useGapsanStore } from "@/lib/gapsan-store";
 import { InstagramIcon, FacebookIcon, TikTokIcon } from "./SocialIcons";
 
@@ -196,6 +196,14 @@ export default function Footer() {
             >
               Çerez Tercihleri
             </button>
+            <Link
+              href="/yonetim"
+              className="text-[#536174] hover:text-[#111F35] underline-offset-4 hover:underline text-[12px] flex items-center gap-1"
+              title="GAPSAN Yönetim Paneli"
+            >
+              <Lock className="w-3 h-3" />
+              <span>Yönetim</span>
+            </Link>
           </div>
         </div>
       </div>
