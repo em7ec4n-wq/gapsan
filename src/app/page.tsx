@@ -14,9 +14,9 @@ import {
 } from "@/components/HomeSections";
 
 export const metadata: Metadata = {
-  title: "GAPSAN Şirketler Grubu | Otomotiv, Gayrimenkul ve Sigorta",
+  title: "GAPSAN Şirketler Grubu | Otomotiv, İnşaat ve Sigorta",
   description:
-    "Esenyurt, İstanbul merkezli GAPSAN Şirketler Grubu ile araç alım-satım ve takas, satılık-kiralık gayrimenkul ve sigorta taleplerinizi hızlıca oluşturun.",
+    "Esenyurt, İstanbul merkezli GAPSAN Şirketler Grubu ile araç alım-satım ve takas, inşaat & gayrimenkul ve sigorta taleplerinizi hızlıca oluşturun.",
   alternates: {
     canonical: "/",
   },

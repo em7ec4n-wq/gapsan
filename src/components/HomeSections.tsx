@@ -141,7 +141,7 @@ export function ListingGuideSection() {
 
             <div className="space-y-2">
               <h3 className="font-heading font-bold text-[16px] text-[#111F35]">
-                Gayrimenkul İlanlarında Seçim Kriterleri
+                İnşaat &amp; Gayrimenkul İlanlarında Seçim Kriterleri
               </h3>
               <p className="text-[14px] text-[#536174]">
                 Taşınmaz ararken <strong>işlem türü (Satılık / Kiralık)</strong>
@@ -235,9 +235,9 @@ export function ServiceShowcaseSection() {
       icon: Car,
     },
     {
-      title: "Satılık ve Kiralık",
-      desc: "Konut ve iş yeri ilanlarında size uygun seçenekler.",
-      href: "/gayrimenkul",
+      title: "İnşaat ve Gayrimenkul",
+      desc: "Konut ve ticari alan projelerinde size uygun seçenekler.",
+      href: "/insaat",
       icon: Building2,
     },
     {
@@ -575,10 +575,10 @@ export function ReachGapsanSection() {
               id="ulasin-heading"
               className="font-heading font-bold text-[26px] md:text-[32px] text-white"
             >
-              Gapşan’a Ulaşın
+              GAPSAN’a Ulaşın
             </h2>
             <p className="text-[15px] text-white/85 max-w-[480px]">
-              Otomotiv (0’ km &amp; senetli satış), gayrimenkul ve sigorta
+              Otomotiv (0’ km &amp; senetli satış), inşaat ve sigorta
               ihtiyaçlarınız için hemen bizimle iletişime geçin. Hafta sonu
               nöbetçi noter satışımız mevcuttur.
             </p>

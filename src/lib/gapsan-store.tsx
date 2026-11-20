@@ -58,7 +58,7 @@ interface GapsanStoreContextValue extends GapsanStoreState {
   resetStore: () => void;
 }
 
-const STORAGE_KEY = "gapsan_cms_state_v1";
+const STORAGE_KEY = "gapsan_cms_state_v4";
 const COOKIE_STORAGE_KEY = "gapsan_cookie_prefs_v1";
 
 const DEFAULT_COOKIE_PREFS: CookiePreferences = {
@@ -69,7 +69,7 @@ const DEFAULT_COOKIE_PREFS: CookiePreferences = {
 };
 
 const DEFAULT_CONSTRUCTION_SCOPE =
-  "Gayrimenkul birimimiz bünyesinde konut ve ticari alan geliştirme, tadilat ve proje danışmanlığı faaliyetleri işletme onaylı kapsam dahilinde yürütülmektedir.";
+  "İnşaat ve gayrimenkul birimimiz bünyesinde konut ve ticari alan geliştirme, taahhüt ve proje danışmanlığı faaliyetleri işletme onaylı kapsam dahilinde yürütülmektedir.";
 
 const GapsanStoreContext = createContext<GapsanStoreContextValue | null>(null);
 
@@ -101,21 +101,64 @@ export function GapsanStoreProvider({
 
   useEffect(() => {
     try {
+      // Clear legacy storage keys so old cached copy does not persist in visitor browsers
+      ["gapsan_cms_state_v1", "gapsan_cms_state_v2", "gapsan_cms_state_v3"].forEach(
+        (legacyKey) => {
+          try {
+            localStorage.removeItem(legacyKey);
+          } catch {
+            // ignore
+          }
+        }
+      );
+
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (typeof parsed.previewMode === "boolean")
           setPreviewMode(parsed.previewMode);
-        if (Array.isArray(parsed.slides) && parsed.slides.length > 0)
-          setSlides(parsed.slides);
+
+        if (Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+          const hasLegacyCopy = parsed.slides.some(
+            (s: HeroSlideConfig) =>
+              s.heading?.toLowerCase().includes("gayrimenkul") ||
+              s.ctaHref === "/gayrimenkul"
+          );
+          if (hasLegacyCopy) {
+            setSlides(INITIAL_HERO_SLIDES);
+          } else {
+            setSlides(parsed.slides);
+          }
+        } else {
+          setSlides(INITIAL_HERO_SLIDES);
+        }
+
         if (Array.isArray(parsed.vehicles)) setVehicles(parsed.vehicles);
         if (Array.isArray(parsed.realEstates))
           setRealEstates(parsed.realEstates);
         if (Array.isArray(parsed.projects)) setProjects(parsed.projects);
         if (Array.isArray(parsed.reviews)) setReviews(parsed.reviews);
-        if (parsed.contact) setContact(parsed.contact);
+
+        if (parsed.contact) {
+          setContact({
+            ...CONTACT_CONFIG,
+            ...parsed.contact,
+            address: CONTACT_CONFIG.address,
+            generalEmail: CONTACT_CONFIG.generalEmail,
+            insuranceEmail: CONTACT_CONFIG.insuranceEmail,
+            otomotivEmail: CONTACT_CONFIG.otomotivEmail,
+            gayrimenkulEmail: CONTACT_CONFIG.gayrimenkulEmail,
+            emails: CONTACT_CONFIG.emails,
+            socialMedia: CONTACT_CONFIG.socialMedia,
+            units: CONTACT_CONFIG.units,
+          });
+        }
+
         if (typeof parsed.constructionApprovedScope === "string")
           setConstructionApprovedScope(parsed.constructionApprovedScope);
+      } else {
+        setSlides(INITIAL_HERO_SLIDES);
+        setContact(CONTACT_CONFIG);
       }
 
       const savedCookies = localStorage.getItem(COOKIE_STORAGE_KEY);
