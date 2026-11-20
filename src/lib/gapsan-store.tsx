@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from "react";
 import {
   CONTACT_CONFIG,
@@ -31,6 +32,7 @@ export interface CookiePreferences {
 }
 
 export interface GapsanStoreState {
+  hydrated: boolean;
   previewMode: boolean;
   slides: HeroSlideConfig[];
   vehicles: VehicleListing[];
@@ -53,12 +55,14 @@ interface GapsanStoreContextValue extends GapsanStoreState {
   setReviews: React.Dispatch<React.SetStateAction<CustomerReview[]>>;
   setContact: React.Dispatch<React.SetStateAction<ContactConfig>>;
   setConstructionApprovedScope: React.Dispatch<React.SetStateAction<string>>;
-  saveCookiePreferences: (prefs: Omit<CookiePreferences, "necessary" | "decided">) => void;
+  saveCookiePreferences: (
+    prefs: Omit<CookiePreferences, "necessary" | "decided">
+  ) => void;
   setCookieModalOpen: (open: boolean) => void;
   resetStore: () => void;
 }
 
-const STORAGE_KEY = "gapsan_cms_state_v4";
+const STORAGE_KEY = "gapsan_cms_state_v5";
 const COOKIE_STORAGE_KEY = "gapsan_cookie_prefs_v1";
 
 const DEFAULT_COOKIE_PREFS: CookiePreferences = {
@@ -73,25 +77,69 @@ const DEFAULT_CONSTRUCTION_SCOPE =
 
 const GapsanStoreContext = createContext<GapsanStoreContextValue | null>(null);
 
+function sanitizeParsedContact(rawContact: Partial<ContactConfig>): ContactConfig {
+  return {
+    ...CONTACT_CONFIG,
+    ...rawContact,
+    address:
+      rawContact.address && !rawContact.address.includes("Yeşil Alan")
+        ? rawContact.address
+        : CONTACT_CONFIG.address,
+    generalEmail:
+      rawContact.generalEmail &&
+      !rawContact.generalEmail.includes("gapsansirketler")
+        ? rawContact.generalEmail
+        : CONTACT_CONFIG.generalEmail,
+    insuranceEmail:
+      rawContact.insuranceEmail || CONTACT_CONFIG.insuranceEmail,
+    otomotivEmail:
+      rawContact.otomotivEmail || CONTACT_CONFIG.otomotivEmail,
+    gayrimenkulEmail:
+      rawContact.gayrimenkulEmail || CONTACT_CONFIG.gayrimenkulEmail,
+    emails: {
+      ...CONTACT_CONFIG.emails,
+      ...(rawContact.emails || {}),
+    },
+    socialMedia: {
+      ...CONTACT_CONFIG.socialMedia,
+      ...(rawContact.socialMedia || {}),
+    },
+    units: {
+      otomotiv: {
+        ...CONTACT_CONFIG.units.otomotiv,
+        ...(rawContact.units?.otomotiv || {}),
+      },
+      gayrimenkul: {
+        ...CONTACT_CONFIG.units.gayrimenkul,
+        ...(rawContact.units?.gayrimenkul || {}),
+      },
+      sigorta: {
+        ...CONTACT_CONFIG.units.sigorta,
+        ...(rawContact.units?.sigorta || {}),
+      },
+    },
+  };
+}
+
 export function GapsanStoreProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [previewMode, setPreviewMode] = useState<boolean>(true);
-  const [slides, setSlides] = useState<HeroSlideConfig[]>(INITIAL_HERO_SLIDES);
-  const [vehicles, setVehicles] = useState<VehicleListing[]>(
+  const [previewMode, setPreviewModeState] = useState<boolean>(true);
+  const [slides, setSlidesState] = useState<HeroSlideConfig[]>(INITIAL_HERO_SLIDES);
+  const [vehicles, setVehiclesState] = useState<VehicleListing[]>(
     INITIAL_VEHICLE_LISTINGS
   );
-  const [realEstates, setRealEstates] = useState<RealEstateListing[]>(
+  const [realEstates, setRealEstatesState] = useState<RealEstateListing[]>(
     INITIAL_REAL_ESTATE_LISTINGS
   );
-  const [projects, setProjects] = useState<ConstructionProject[]>(
+  const [projects, setProjectsState] = useState<ConstructionProject[]>(
     INITIAL_CONSTRUCTION_PROJECTS
   );
-  const [reviews, setReviews] = useState<CustomerReview[]>(INITIAL_REVIEWS);
-  const [contact, setContact] = useState<ContactConfig>(CONTACT_CONFIG);
-  const [constructionApprovedScope, setConstructionApprovedScope] =
+  const [reviews, setReviewsState] = useState<CustomerReview[]>(INITIAL_REVIEWS);
+  const [contact, setContactState] = useState<ContactConfig>(CONTACT_CONFIG);
+  const [constructionApprovedScope, setConstructionApprovedScopeState] =
     useState<string>(DEFAULT_CONSTRUCTION_SCOPE);
   const [cookiePreferences, setCookiePreferences] = useState<CookiePreferences>(
     DEFAULT_COOKIE_PREFS
@@ -99,9 +147,50 @@ export function GapsanStoreProvider({
   const [cookieModalOpen, setCookieModalOpen] = useState<boolean>(false);
   const [hydrated, setHydrated] = useState<boolean>(false);
 
+  const isDirtyRef = useRef<boolean>(false);
+  const updatedAtRef = useRef<number>(0);
+
+  const applyParsedState = useCallback((parsed: Record<string, unknown>) => {
+    if (typeof parsed.updatedAt === "number") {
+      updatedAtRef.current = parsed.updatedAt;
+    }
+    if (typeof parsed.previewMode === "boolean") {
+      setPreviewModeState(parsed.previewMode);
+    }
+    if (Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+      const hasLegacyCopy = (parsed.slides as HeroSlideConfig[]).some(
+        (s) =>
+          s.heading?.toLowerCase().includes("gayrimenkul") ||
+          s.ctaHref === "/gayrimenkul"
+      );
+      setSlidesState(hasLegacyCopy ? INITIAL_HERO_SLIDES : (parsed.slides as HeroSlideConfig[]));
+    }
+    if (Array.isArray(parsed.vehicles) && parsed.vehicles.length > 0) {
+      setVehiclesState(parsed.vehicles as VehicleListing[]);
+    }
+    if (Array.isArray(parsed.realEstates) && parsed.realEstates.length > 0) {
+      setRealEstatesState(parsed.realEstates as RealEstateListing[]);
+    }
+    if (Array.isArray(parsed.projects) && parsed.projects.length > 0) {
+      setProjectsState(parsed.projects as ConstructionProject[]);
+    }
+    if (Array.isArray(parsed.reviews)) {
+      setReviewsState(parsed.reviews as CustomerReview[]);
+    }
+    if (parsed.contact && typeof parsed.contact === "object") {
+      setContactState(sanitizeParsedContact(parsed.contact as Partial<ContactConfig>));
+    }
+    if (typeof parsed.constructionApprovedScope === "string") {
+      setConstructionApprovedScopeState(parsed.constructionApprovedScope);
+    }
+  }, []);
+
   useEffect(() => {
+    let localTimestamp = 0;
+    let localVehiclesCount = 0;
+    let localRealEstatesCount = 0;
+
     try {
-      // Clear legacy storage keys so old cached copy does not persist in visitor browsers
       ["gapsan_cms_state_v1", "gapsan_cms_state_v2", "gapsan_cms_state_v3"].forEach(
         (legacyKey) => {
           try {
@@ -112,82 +201,44 @@ export function GapsanStoreProvider({
         }
       );
 
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (typeof parsed.previewMode === "boolean")
-          setPreviewMode(parsed.previewMode);
-
-        if (Array.isArray(parsed.slides) && parsed.slides.length > 0) {
-          const hasLegacyCopy = parsed.slides.some(
-            (s: HeroSlideConfig) =>
-              s.heading?.toLowerCase().includes("gayrimenkul") ||
-              s.ctaHref === "/gayrimenkul"
-          );
-          if (hasLegacyCopy) {
-            setSlides(INITIAL_HERO_SLIDES);
-          } else {
-            setSlides(parsed.slides);
-          }
-        } else {
-          setSlides(INITIAL_HERO_SLIDES);
-        }
-
-        if (Array.isArray(parsed.vehicles)) setVehicles(parsed.vehicles);
-        if (Array.isArray(parsed.realEstates))
-          setRealEstates(parsed.realEstates);
-        if (Array.isArray(parsed.projects)) setProjects(parsed.projects);
-        if (Array.isArray(parsed.reviews)) setReviews(parsed.reviews);
-
-        if (parsed.contact) {
-          const mergedContact: ContactConfig = {
-            ...CONTACT_CONFIG,
-            ...parsed.contact,
-            address:
-              parsed.contact.address && !parsed.contact.address.includes("Yeşil Alan")
-                ? parsed.contact.address
-                : CONTACT_CONFIG.address,
-            generalEmail:
-              parsed.contact.generalEmail && !parsed.contact.generalEmail.includes("gapsansirketler")
-                ? parsed.contact.generalEmail
-                : CONTACT_CONFIG.generalEmail,
-            insuranceEmail:
-              parsed.contact.insuranceEmail || CONTACT_CONFIG.insuranceEmail,
-            otomotivEmail:
-              parsed.contact.otomotivEmail || CONTACT_CONFIG.otomotivEmail,
-            gayrimenkulEmail:
-              parsed.contact.gayrimenkulEmail || CONTACT_CONFIG.gayrimenkulEmail,
-            emails: {
-              ...CONTACT_CONFIG.emails,
-              ...(parsed.contact.emails || {}),
-            },
-            socialMedia: {
-              ...CONTACT_CONFIG.socialMedia,
-              ...(parsed.contact.socialMedia || {}),
-            },
-            units: {
-              otomotiv: {
-                ...CONTACT_CONFIG.units.otomotiv,
-                ...(parsed.contact.units?.otomotiv || {}),
-              },
-              gayrimenkul: {
-                ...CONTACT_CONFIG.units.gayrimenkul,
-                ...(parsed.contact.units?.gayrimenkul || {}),
-              },
-              sigorta: {
-                ...CONTACT_CONFIG.units.sigorta,
-                ...(parsed.contact.units?.sigorta || {}),
-              },
-            },
-          };
-          setContact(mergedContact);
-        }
-
-        if (typeof parsed.constructionApprovedScope === "string")
-          setConstructionApprovedScope(parsed.constructionApprovedScope);
+      const savedV5 = localStorage.getItem(STORAGE_KEY);
+      if (savedV5) {
+        const parsed = JSON.parse(savedV5);
+        localTimestamp = typeof parsed.updatedAt === "number" ? parsed.updatedAt : 0;
+        localVehiclesCount = Array.isArray(parsed.vehicles) ? parsed.vehicles.length : 0;
+        localRealEstatesCount = Array.isArray(parsed.realEstates) ? parsed.realEstates.length : 0;
+        applyParsedState(parsed);
       } else {
-        setSlides(INITIAL_HERO_SLIDES);
-        setContact(CONTACT_CONFIG);
+        // Migrate any user-created items from v4 and merge with the new demo listings
+        const savedV4 = localStorage.getItem("gapsan_cms_state_v4");
+        if (savedV4) {
+          const parsedV4 = JSON.parse(savedV4);
+          const v4Vehicles: VehicleListing[] = Array.isArray(parsedV4.vehicles)
+            ? parsedV4.vehicles
+            : [];
+          const v4RealEstates: RealEstateListing[] = Array.isArray(parsedV4.realEstates)
+            ? parsedV4.realEstates
+            : [];
+          const mergedVehicles = [
+            ...v4Vehicles,
+            ...INITIAL_VEHICLE_LISTINGS.filter(
+              (initV) => !v4Vehicles.some((x) => x.id === initV.id)
+            ),
+          ];
+          const mergedRealEstates = [
+            ...v4RealEstates,
+            ...INITIAL_REAL_ESTATE_LISTINGS.filter(
+              (initR) => !v4RealEstates.some((x) => x.id === initR.id)
+            ),
+          ];
+          applyParsedState({
+            ...parsedV4,
+            vehicles: mergedVehicles,
+            realEstates: mergedRealEstates,
+            projects: INITIAL_CONSTRUCTION_PROJECTS,
+          });
+          localStorage.removeItem("gapsan_cms_state_v4");
+        }
       }
 
       const savedCookies = localStorage.getItem(COOKIE_STORAGE_KEY);
@@ -201,31 +252,72 @@ export function GapsanStoreProvider({
         });
       }
     } catch {
-      // ignore storage read errors
+      // ignore local storage errors
     } finally {
       setHydrated(true);
     }
-  }, []);
+
+    // Fetch live shared state from cloud API
+    fetch("/api/cms", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!json?.data || isDirtyRef.current) return;
+        const cloudData = json.data;
+        const cloudTimestamp =
+          typeof cloudData.updatedAt === "number" ? cloudData.updatedAt : 0;
+        const cloudVehiclesCount = Array.isArray(cloudData.vehicles)
+          ? cloudData.vehicles.length
+          : 0;
+        const cloudRealEstatesCount = Array.isArray(cloudData.realEstates)
+          ? cloudData.realEstates.length
+          : 0;
+
+        if (
+          cloudTimestamp >= localTimestamp ||
+          (localVehiclesCount === 0 && cloudVehiclesCount > 0) ||
+          (localRealEstatesCount === 0 && cloudRealEstatesCount > 0)
+        ) {
+          applyParsedState(cloudData);
+        }
+      })
+      .catch(() => {
+        // ignore network error
+      });
+  }, [applyParsedState]);
 
   useEffect(() => {
     if (!hydrated) return;
+    const payload = {
+      updatedAt: updatedAtRef.current || Date.now(),
+      previewMode,
+      slides,
+      vehicles,
+      realEstates,
+      projects,
+      reviews,
+      contact,
+      constructionApprovedScope,
+    };
+
     try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          previewMode,
-          slides,
-          vehicles,
-          realEstates,
-          projects,
-          reviews,
-          contact,
-          constructionApprovedScope,
-        })
-      );
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch {
       // ignore storage write errors
     }
+
+    if (!isDirtyRef.current) return;
+
+    const timer = setTimeout(() => {
+      fetch("/api/cms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).catch(() => {
+        // ignore
+      });
+    }, 350);
+
+    return () => clearTimeout(timer);
   }, [
     hydrated,
     previewMode,
@@ -237,6 +329,82 @@ export function GapsanStoreProvider({
     contact,
     constructionApprovedScope,
   ]);
+
+  const markDirty = useCallback(() => {
+    isDirtyRef.current = true;
+    updatedAtRef.current = Date.now();
+  }, []);
+
+  const setPreviewMode = useCallback(
+    (val: boolean) => {
+      markDirty();
+      setPreviewModeState(val);
+    },
+    [markDirty]
+  );
+
+  const setSlides: React.Dispatch<React.SetStateAction<HeroSlideConfig[]>> =
+    useCallback(
+      (action) => {
+        markDirty();
+        setSlidesState(action);
+      },
+      [markDirty]
+    );
+
+  const setVehicles: React.Dispatch<React.SetStateAction<VehicleListing[]>> =
+    useCallback(
+      (action) => {
+        markDirty();
+        setVehiclesState(action);
+      },
+      [markDirty]
+    );
+
+  const setRealEstates: React.Dispatch<React.SetStateAction<RealEstateListing[]>> =
+    useCallback(
+      (action) => {
+        markDirty();
+        setRealEstatesState(action);
+      },
+      [markDirty]
+    );
+
+  const setProjects: React.Dispatch<React.SetStateAction<ConstructionProject[]>> =
+    useCallback(
+      (action) => {
+        markDirty();
+        setProjectsState(action);
+      },
+      [markDirty]
+    );
+
+  const setReviews: React.Dispatch<React.SetStateAction<CustomerReview[]>> =
+    useCallback(
+      (action) => {
+        markDirty();
+        setReviewsState(action);
+      },
+      [markDirty]
+    );
+
+  const setContact: React.Dispatch<React.SetStateAction<ContactConfig>> =
+    useCallback(
+      (action) => {
+        markDirty();
+        setContactState(action);
+      },
+      [markDirty]
+    );
+
+  const setConstructionApprovedScope: React.Dispatch<React.SetStateAction<string>> =
+    useCallback(
+      (action) => {
+        markDirty();
+        setConstructionApprovedScopeState(action);
+      },
+      [markDirty]
+    );
 
   const saveCookiePreferences = useCallback(
     (prefs: Omit<CookiePreferences, "necessary" | "decided">) => {
@@ -258,24 +426,26 @@ export function GapsanStoreProvider({
   );
 
   const resetStore = useCallback(() => {
-    setPreviewMode(true);
-    setSlides(INITIAL_HERO_SLIDES);
-    setVehicles(INITIAL_VEHICLE_LISTINGS);
-    setRealEstates(INITIAL_REAL_ESTATE_LISTINGS);
-    setProjects(INITIAL_CONSTRUCTION_PROJECTS);
-    setReviews(INITIAL_REVIEWS);
-    setContact(CONTACT_CONFIG);
-    setConstructionApprovedScope(DEFAULT_CONSTRUCTION_SCOPE);
+    markDirty();
+    setPreviewModeState(true);
+    setSlidesState(INITIAL_HERO_SLIDES);
+    setVehiclesState(INITIAL_VEHICLE_LISTINGS);
+    setRealEstatesState(INITIAL_REAL_ESTATE_LISTINGS);
+    setProjectsState(INITIAL_CONSTRUCTION_PROJECTS);
+    setReviewsState(INITIAL_REVIEWS);
+    setContactState(CONTACT_CONFIG);
+    setConstructionApprovedScopeState(DEFAULT_CONSTRUCTION_SCOPE);
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {
       // ignore
     }
-  }, []);
+  }, [markDirty]);
 
   return (
     <GapsanStoreContext.Provider
       value={{
+        hydrated,
         previewMode,
         setPreviewMode,
         slides,

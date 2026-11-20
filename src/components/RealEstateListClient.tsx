@@ -107,11 +107,11 @@ export default function RealEstateListClient({
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <Link
-            href="/gayrimenkul"
+            href="/insaat"
             className="inline-flex items-center gap-1 text-[14px] font-medium text-[#536174] hover:text-[#111F35] mb-2"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>Gayrimenkul Ana Sayfa</span>
+            <span>İnşaat &amp; Gayrimenkul Ana Sayfa</span>
           </Link>
           <h1
             ref={resultsHeadingRef}
@@ -280,26 +280,37 @@ export default function RealEstateListClient({
           {filtered.map((item) => (
             <article
               key={item.id}
-              className="bg-white border border-[#E0E4EA] rounded-[10px] overflow-hidden flex flex-col justify-between"
+              className="bg-white border border-[#E0E4EA] hover:border-[#D6A948] transition-colors rounded-[10px] overflow-hidden flex flex-col justify-between"
             >
               <div>
-                <div className="aspect-[4/3] bg-[#111F35] overflow-hidden">
+                <Link
+                  href={`/gayrimenkul/ilan/${item.slug}`}
+                  className="block relative aspect-[4/3] bg-[#111F35] overflow-hidden"
+                >
                   <img
                     src={
                       item.images[0] ||
                       "/assets/gapsan/gapsan-gayrimenkul-konsept.webp"
                     }
                     alt={item.title}
-                    className="w-full h-full object-cover object-center"
+                    className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300"
                   />
-                </div>
+                  {item.images.length > 1 && (
+                    <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-white text-[11px] font-semibold">
+                      {item.images.length} Fotoğraf
+                    </span>
+                  )}
+                </Link>
                 <div className="p-5 space-y-2">
                   <span className="inline-block px-2 py-0.5 rounded bg-[#F7F5EF] border border-[#E0E4EA] text-[12px] font-semibold text-[#111F35]">
                     {item.listingType} &bull; {item.propertyType}
                   </span>
-                  <h2 className="font-heading font-bold text-[18px] text-[#111F35]">
+                  <Link
+                    href={`/gayrimenkul/ilan/${item.slug}`}
+                    className="font-heading font-bold text-[18px] text-[#111F35] hover:text-[#D6A948] block"
+                  >
                     {item.title}
-                  </h2>
+                  </Link>
                   <p className="text-[14px] text-[#536174]">
                     {[
                       item.district,

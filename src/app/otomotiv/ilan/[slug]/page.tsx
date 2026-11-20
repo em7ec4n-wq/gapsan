@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import OtomotivDetailClient from "@/components/OtomotivDetailClient";
 import { DEMO_VEHICLE_LISTING } from "@/lib/gapsan-data";
 
+export const dynamicParams = true;
+
 export function generateStaticParams() {
   return [{ slug: DEMO_VEHICLE_LISTING.slug }];
 }

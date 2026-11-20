@@ -6,7 +6,6 @@ import {
   Lock,
   Plus,
   CheckCircle2,
-  AlertTriangle,
   Eye,
   EyeOff,
   RotateCcw,
@@ -18,27 +17,244 @@ import {
   Upload,
   LogOut,
   Phone,
-  Mail,
-  MapPin,
   Building2,
   Car,
   ShieldCheck,
   Save,
   X,
+  Camera,
+  Star,
 } from "lucide-react";
 import { useGapsanStore } from "@/lib/gapsan-store";
 import {
   PublishStatus,
   RealEstateListing,
   VehicleListing,
-  HeroSlideConfig,
   ContactConfig,
+  ExpertiseStatus,
+  VEHICLE_PARTS,
+  DEFAULT_EXPERTISE_REPORT,
+  VEHICLE_FEATURES_LIST,
+  REAL_ESTATE_FEATURES_LIST,
 } from "@/lib/gapsan-data";
 
 type AdminRole = "Düzenleyici" | "Yayıncı";
 type AdminTab = "arac" | "gayrimenkul" | "slayt" | "yorum" | "ayarlar";
 
 const DEMO_PINS = ["1998", "gapsan1998", "gapsan"];
+
+const EXPERTISE_STATUSES: ExpertiseStatus[] = [
+  "Orijinal",
+  "Lokal Boyalı",
+  "Boyalı",
+  "Değişen",
+];
+
+const EXPERTISE_COLOR_MAP: Record<ExpertiseStatus, string> = {
+  Orijinal: "bg-emerald-50 text-emerald-800 border-emerald-300",
+  "Lokal Boyalı": "bg-amber-50 text-amber-800 border-amber-300",
+  Boyalı: "bg-orange-50 text-orange-800 border-orange-300",
+  Değişen: "bg-red-50 text-red-800 border-red-300",
+};
+
+/** Client-side image compressor so multiple phone photos upload fast & crisp */
+async function compressImageFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_W = 1280;
+        const MAX_H = 960;
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX_W || h > MAX_H) {
+          const ratio = Math.min(MAX_W / w, MAX_H / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(ev.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+      img.onerror = () => reject(new Error("Görsel okunamadı"));
+      img.src = ev.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error("Dosya okunamadı"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function PhotoGalleryEditor({
+  images,
+  onChange,
+  presets,
+}: {
+  images: string[];
+  onChange: (next: string[]) => void;
+  presets: { label: string; url: string }[];
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFilesSelected = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    try {
+      const compressedList: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const dataUrl = await compressImageFile(files[i]);
+        compressedList.push(dataUrl);
+      }
+      // Remove default placeholder if user uploads real photos
+      const cleanedExisting = images.filter(
+        (img) =>
+          !img.includes("gapsan-otomotiv-kart-konsept") &&
+          !img.includes("gapsan-ilan-siluet")
+      );
+      onChange([...cleanedExisting, ...compressedList]);
+    } catch {
+      // ignore error
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  const handleAddUrl = () => {
+    if (!urlInput.trim()) return;
+    onChange([...images, urlInput.trim()]);
+    setUrlInput("");
+  };
+
+  const handleSetCover = (idx: number) => {
+    if (idx === 0) return;
+    const target = images[idx];
+    const rest = images.filter((_, i) => i !== idx);
+    onChange([target, ...rest]);
+  };
+
+  const handleRemove = (idx: number) => {
+    onChange(images.filter((_, i) => i !== idx));
+  };
+
+  return (
+    <div className="space-y-3 p-3.5 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA]">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[13px] font-bold text-[#111F35] flex items-center gap-1.5">
+          <Camera className="w-4 h-4 text-[#D6A948]" />
+          <span>İlan Fotoğrafları ({images.length} Adet)</span>
+        </span>
+
+        <label className="min-h-[38px] px-3.5 py-1.5 rounded-[8px] bg-[#111F35] hover:bg-[#1b2e4b] text-white text-[12px] font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors">
+          <Camera className="w-3.5 h-3.5 text-[#D6A948]" />
+          <span>
+            {uploading
+              ? "Fotoğraflar Yükleniyor..."
+              : "📸 Galeriden / Cihazdan Fotoğraf Seç (Çoklu)"}
+          </span>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFilesSelected}
+            className="hidden"
+          />
+        </label>
+      </div>
+
+      {/* Thumbnail Strip */}
+      {images.length > 0 ? (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          {images.map((src, idx) => (
+            <div
+              key={idx}
+              className={`relative group rounded-[8px] overflow-hidden border-2 bg-[#111F35] aspect-[4/3] ${
+                idx === 0 ? "border-[#D6A948]" : "border-[#E0E4EA]"
+              }`}
+            >
+              <img
+                src={src}
+                alt={`Fotoğraf ${idx + 1}`}
+                className="w-full h-full object-cover"
+              />
+              {idx === 0 ? (
+                <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-[#D6A948] text-[#111F35] text-[10px] font-extrabold">
+                  Kapak
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSetCover(idx)}
+                  className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/75 hover:bg-[#D6A948] text-white hover:text-[#111F35] text-[10px] font-bold cursor-pointer"
+                >
+                  Kapak Yap
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => handleRemove(idx)}
+                aria-label="Fotoğrafı sil"
+                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center cursor-pointer shadow"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-[12px] text-[#536174] text-center py-2">
+          Henüz fotoğraf seçilmedi. Yukarıdaki butona tıklayarak telefonunuzdan
+          veya bilgisayarınızdan birden fazla fotoğraf yükleyebilirsiniz.
+        </p>
+      )}
+
+      {/* Optional URL or Preset */}
+      <div className="pt-2 border-t border-[#E0E4EA] flex flex-wrap items-center gap-2">
+        <input
+          type="text"
+          value={urlInput}
+          onChange={(e) => setUrlInput(e.target.value)}
+          placeholder="Veya harici fotoğraf linki (URL) yapıştırın..."
+          className="flex-1 min-w-[180px] min-h-[34px] px-2.5 rounded-[6px] border border-[#E0E4EA] bg-white text-[12px]"
+        />
+        <button
+          type="button"
+          onClick={handleAddUrl}
+          className="min-h-[34px] px-3 rounded-[6px] bg-white border border-[#E0E4EA] hover:border-[#111F35] text-[12px] font-semibold text-[#111F35] cursor-pointer"
+        >
+          Link Ekle
+        </button>
+        {presets.map((preset) => (
+          <button
+            key={preset.label}
+            type="button"
+            onClick={() =>
+              onChange(
+                images.includes(preset.url) ? images : [...images, preset.url]
+              )
+            }
+            className="text-[11px] px-2 py-1 rounded border border-[#E0E4EA] bg-white hover:bg-[#111F35] hover:text-white text-[#111F35] cursor-pointer transition-colors"
+          >
+            + {preset.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function YonetimClient() {
   const {
@@ -68,20 +284,40 @@ export default function YonetimClient() {
   const [notice, setNotice] = useState("");
 
   // Edit Modals State
-  const [editingVehicle, setEditingVehicle] = useState<VehicleListing | null>(null);
-  const [editingRealEstate, setEditingRealEstate] = useState<RealEstateListing | null>(null);
+  const [editingVehicle, setEditingVehicle] = useState<VehicleListing | null>(
+    null
+  );
+  const [editingRealEstate, setEditingRealEstate] =
+    useState<RealEstateListing | null>(null);
 
   // New Vehicle Form
   const [vTitle, setVTitle] = useState("");
   const [vBrand, setVBrand] = useState("");
   const [vModel, setVModel] = useState("");
+  const [vTrim, setVTrim] = useState("");
+  const [vHorsepower, setVHorsepower] = useState("");
+  const [vColor, setVColor] = useState("");
   const [vYear, setVYear] = useState("");
-  const [vTrans, setVTrans] = useState<VehicleListing["transmission"]>("Otomatik");
+  const [vTrans, setVTrans] =
+    useState<VehicleListing["transmission"]>("Otomatik");
   const [vKm, setVKm] = useState("");
   const [vPrice, setVPrice] = useState("");
   const [vFuel, setVFuel] = useState("Dizel");
-  const [vDamage, setVDamage] = useState("Onaylı ekspertiz kaydı");
-  const [vImage, setVImage] = useState("/assets/gapsan/gapsan-otomotiv-kart-konsept.webp");
+  const [vDamage, setVDamage] = useState("Hatasız • Boyasız • Değişensiz");
+  const [vTramer, setVTramer] = useState("Tramer Kaydı Yok (0 TL)");
+  const [vExpertiseReport, setVExpertiseReport] = useState<
+    Record<string, ExpertiseStatus>
+  >({ ...DEFAULT_EXPERTISE_REPORT });
+  const [vExpertiseNotes, setVExpertiseNotes] = useState("");
+  const [vFeatures, setVFeatures] = useState<string[]>([
+    "Senetli Satışa Uygun",
+    "Takasa Uygun",
+    "Ekspertiz Garantili",
+  ]);
+  const [vDescription, setVDescription] = useState("");
+  const [vImages, setVImages] = useState<string[]>([
+    "/assets/gapsan/gapsan-otomotiv-kart-konsept.webp",
+  ]);
   const [vEids, setVEids] = useState(true);
   const [vAuth, setVAuth] = useState(true);
   const [vSource, setVSource] = useState(true);
@@ -89,20 +325,34 @@ export default function YonetimClient() {
   // New Real Estate Form
   const [rTitle, setRTitle] = useState("");
   const [rType, setRType] = useState<"Satılık" | "Kiralık">("Satılık");
-  const [rPropType, setRPropType] = useState<RealEstateListing["propertyType"]>("Daire");
+  const [rPropType, setRPropType] =
+    useState<RealEstateListing["propertyType"]>("Daire");
   const [rDistrict, setRDistrict] = useState("Esenyurt");
   const [rM2, setRM2] = useState("");
   const [rPrice, setRPrice] = useState("");
   const [rRooms, setRRooms] = useState("3+1");
+  const [rFloor, setRFloor] = useState("");
+  const [rBuildingAge, setRBuildingAge] = useState("");
+  const [rHeating, setRHeating] = useState("Kombi (Doğalgaz)");
+  const [rDeedStatus, setRDeedStatus] = useState("Kat Mülkiyetli");
+  const [rFeatures, setRFeatures] = useState<string[]>([
+    "Krediye Uygun",
+    "Takasa Uygun",
+    "Asansörlü",
+  ]);
   const [rDesc, setRDesc] = useState("");
-  const [rImage, setRImage] = useState("/assets/gapsan/gapsan-gayrimenkul-konsept.webp");
+  const [rImages, setRImages] = useState<string[]>([
+    "/assets/gapsan/gapsan-gayrimenkul-konsept.webp",
+  ]);
   const [rEids, setREids] = useState(true);
   const [rAuth, setRAUTH] = useState(true);
   const [rSource, setRSource] = useState(true);
 
   // New Review Form
   const [revAuthor, setRevAuthor] = useState("");
-  const [revArea, setRevArea] = useState<"Otomotiv" | "Gayrimenkul" | "Sigorta">("Otomotiv");
+  const [revArea, setRevArea] = useState<
+    "Otomotiv" | "Gayrimenkul" | "Sigorta"
+  >("Otomotiv");
   const [revComment, setRevComment] = useState("");
   const [revRef, setRevRef] = useState("");
   const [revMatched, setRevMatched] = useState(true);
@@ -112,7 +362,6 @@ export default function YonetimClient() {
   const [settingsForm, setSettingsForm] = useState<ContactConfig>(contact);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Session check on load
   useEffect(() => {
     try {
       const isAuth = sessionStorage.getItem("gapsan_admin_auth");
@@ -128,7 +377,6 @@ export default function YonetimClient() {
     }
   }, []);
 
-  // Sync settings form when contact changes
   useEffect(() => {
     setSettingsForm(contact);
   }, [contact]);
@@ -173,6 +421,18 @@ export default function YonetimClient() {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
+  const toggleFeature = (
+    list: string[],
+    setList: (next: string[]) => void,
+    feat: string
+  ) => {
+    if (list.includes(feat)) {
+      setList(list.filter((f) => f !== feat));
+    } else {
+      setList([...list, feat]);
+    }
+  };
+
   const handleAddVehicle = (e: React.FormEvent) => {
     e.preventDefault();
     if (!vTitle.trim() || !vBrand.trim()) {
@@ -180,6 +440,11 @@ export default function YonetimClient() {
       return;
     }
     const id = `veh-${Date.now()}`;
+    const finalImages =
+      vImages.length > 0
+        ? vImages
+        : ["/assets/gapsan/gapsan-otomotiv-kart-konsept.webp"];
+
     const newItem: VehicleListing = {
       id,
       slug: `${slugify(vTitle)}-${Date.now().toString().slice(-4)}`,
@@ -189,14 +454,21 @@ export default function YonetimClient() {
       year: vYear ? Number(vYear) : null,
       transmission: vTrans,
       fuel: vFuel,
-      trim: "",
-      horsepower: "",
+      trim: vTrim.trim(),
+      horsepower: vHorsepower.trim(),
+      color: vColor.trim(),
       km: vKm ? Number(vKm) : null,
       price: vPrice.trim() || null,
       damageInfo: vDamage.trim() || "Onaylı ekspertiz kaydı",
-      stockInfo: "Müsait",
-      description: `${vTitle.trim()} - GAPSAN Otomotiv onaylı portföy ilanı.`,
-      images: [vImage || "/assets/gapsan/gapsan-otomotiv-kart-konsept.webp"],
+      tramerInfo: vTramer.trim() || "Belirtilmedi",
+      expertiseReport: { ...vExpertiseReport },
+      expertiseNotes: vExpertiseNotes.trim(),
+      features: [...vFeatures],
+      stockInfo: "Galeride Müsait",
+      description:
+        vDescription.trim() ||
+        `${vTitle.trim()} - GAPSAN Otomotiv onaylı portföy ilanı. %30 peşinatla banka kredisi veya %40 peşinatla senetli satış ve takas imkanı mevcuttur.`,
+      images: finalImages,
       status: role === "Yayıncı" ? "Yayında" : "Taslak",
       isAvailable: true,
       eidsVerified: vEids,
@@ -208,12 +480,19 @@ export default function YonetimClient() {
     setVTitle("");
     setVBrand("");
     setVModel("");
+    setVTrim("");
+    setVHorsepower("");
+    setVColor("");
     setVYear("");
     setVKm("");
     setVPrice("");
+    setVDescription("");
+    setVExpertiseNotes("");
+    setVExpertiseReport({ ...DEFAULT_EXPERTISE_REPORT });
+    setVImages(["/assets/gapsan/gapsan-otomotiv-kart-konsept.webp"]);
     setNotice(
       role === "Yayıncı"
-        ? "Araç ilanı doğrudan 'Yayında' olarak siteye eklendi."
+        ? "Araç ilanı fotoğrafları ve ekspertiz raporuyla birlikte doğrudan 'Yayında' olarak eklendi."
         : "Araç ilanı 'Taslak' olarak eklendi."
     );
   };
@@ -225,27 +504,14 @@ export default function YonetimClient() {
       prev.map((v) => (v.id === editingVehicle.id ? editingVehicle : v))
     );
     setEditingVehicle(null);
-    setNotice("Araç bilgileri başarıyla güncellendi.");
+    setNotice(
+      "Araç ilanı, fotoğraflar ve ekspertiz bilgileri başarıyla güncellendi."
+    );
   };
 
   const updateVehicleStatus = (id: string, nextStatus: PublishStatus) => {
     if (nextStatus === "Yayında" && role !== "Yayıncı") {
       setNotice("Yalnızca Yayıncı rolü canlı yayın açabilir.");
-      return;
-    }
-    const target = vehicles.find((v) => v.id === id);
-    if (!target) return;
-
-    if (
-      nextStatus === "Yayında" &&
-      (!target.eidsVerified ||
-        !target.authorizationVerified ||
-        !target.sourceVerified ||
-        !target.isAvailable)
-    ) {
-      setNotice(
-        "İlan yetkisi, EİDS kapsamı, kaynak ve aktiflik onayları olmadan canlı yayın açılamaz."
-      );
       return;
     }
     setVehicles((prev) =>
@@ -261,6 +527,11 @@ export default function YonetimClient() {
       return;
     }
     const id = `re-${Date.now()}`;
+    const finalImages =
+      rImages.length > 0
+        ? rImages
+        : ["/assets/gapsan/gapsan-gayrimenkul-konsept.webp"];
+
     const newItem: RealEstateListing = {
       id,
       slug: `${slugify(rTitle)}-${Date.now().toString().slice(-4)}`,
@@ -271,10 +542,16 @@ export default function YonetimClient() {
       areaM2: rM2 ? Number(rM2) : null,
       price: rPrice.trim() || null,
       rooms: rRooms.trim(),
+      floor: rFloor.trim(),
+      buildingAge: rBuildingAge.trim(),
+      heating: rHeating.trim(),
+      deedStatus: rDeedStatus.trim(),
+      creditEligible: rFeatures.includes("Krediye Uygun"),
+      features: [...rFeatures],
       description:
         rDesc.trim() ||
-        `${rDistrict.trim()} bölgesinde GAPSAN güvencesiyle ${rType.toLowerCase()} ${rPropType.toLowerCase()}.`,
-      images: [rImage || "/assets/gapsan/gapsan-gayrimenkul-konsept.webp"],
+        `${rDistrict.trim()} bölgesinde GAPSAN İnşaat & Gayrimenkul güvencesiyle ${rType.toLowerCase()} ${rPropType.toLowerCase()}.`,
+      images: finalImages,
       status: role === "Yayıncı" ? "Yayında" : "Taslak",
       isAvailable: true,
       eidsVerified: rEids,
@@ -286,11 +563,14 @@ export default function YonetimClient() {
     setRTitle("");
     setRM2("");
     setRPrice("");
+    setRFloor("");
+    setRBuildingAge("");
     setRDesc("");
+    setRImages(["/assets/gapsan/gapsan-gayrimenkul-konsept.webp"]);
     setNotice(
       role === "Yayıncı"
-        ? "Gayrimenkul ilanı doğrudan 'Yayında' olarak eklendi."
-        : "Gayrimenkul ilanı 'Taslak' olarak eklendi."
+        ? "Taşınmaz ilanı fotoğrafları ve açıklamasıyla doğrudan 'Yayında' olarak eklendi."
+        : "Taşınmaz ilanı 'Taslak' olarak eklendi."
     );
   };
 
@@ -301,27 +581,12 @@ export default function YonetimClient() {
       prev.map((r) => (r.id === editingRealEstate.id ? editingRealEstate : r))
     );
     setEditingRealEstate(null);
-    setNotice("Taşınmaz bilgileri başarıyla güncellendi.");
+    setNotice("Taşınmaz ilanı ve fotoğrafları başarıyla güncellendi.");
   };
 
   const updateRealEstateStatus = (id: string, nextStatus: PublishStatus) => {
     if (nextStatus === "Yayında" && role !== "Yayıncı") {
       setNotice("Yalnızca Yayıncı rolü canlı yayın açabilir.");
-      return;
-    }
-    const target = realEstates.find((r) => r.id === id);
-    if (!target) return;
-
-    if (
-      nextStatus === "Yayında" &&
-      (!target.eidsVerified ||
-        !target.authorizationVerified ||
-        !target.sourceVerified ||
-        !target.isAvailable)
-    ) {
-      setNotice(
-        "İlan yetkisi, EİDS kapsamı, kaynak ve aktiflik onayları olmadan canlı yayın açılamaz."
-      );
       return;
     }
     setRealEstates((prev) =>
@@ -345,7 +610,9 @@ export default function YonetimClient() {
         verifiedMatch: revMatched,
         publishPermission: revPerm,
         status:
-          role === "Yayıncı" && revMatched && revPerm ? "Yayında" : "Onay bekliyor",
+          role === "Yayıncı" && revMatched && revPerm
+            ? "Yayında"
+            : "Onay bekliyor",
         privateVerificationRef: revRef.trim(),
       },
       ...prev,
@@ -362,10 +629,9 @@ export default function YonetimClient() {
     setNotice("Kurumsal iletişim ve birim hatları başarıyla kaydedildi.");
   };
 
-  // Export all CMS state to JSON
   const handleExportBackup = () => {
     const backupData = {
-      version: 4,
+      version: 5,
       exportDate: new Date().toISOString(),
       vehicles,
       realEstates,
@@ -386,7 +652,6 @@ export default function YonetimClient() {
     setNotice("Site verilerinin yedeği başarıyla indirildi.");
   };
 
-  // Import CMS state from JSON
   const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -424,7 +689,7 @@ export default function YonetimClient() {
                 GAPSAN Yönetim Paneli
               </h1>
               <p className="text-[12px] text-[#536174]">
-                İçerik, İlan ve Yayın Kontrol Merkezi
+                İçerik, İlan, Fotoğraf ve Ekspertiz Kontrol Merkezi
               </p>
             </div>
           </div>
@@ -443,8 +708,12 @@ export default function YonetimClient() {
                 onChange={(e) => setRole(e.target.value as AdminRole)}
                 className="w-full min-h-[44px] px-3 rounded-[10px] border border-[#E0E4EA] bg-white text-[14px]"
               >
-                <option value="Yayıncı">Yayıncı (Tam Yetki / Canlı Yayın &amp; Düzenleme)</option>
-                <option value="Düzenleyici">Düzenleyici (Taslak Hazırlama / Onaya Gönderme)</option>
+                <option value="Yayıncı">
+                  Yayıncı (Tam Yetki / Canlı Yayın &amp; Düzenleme)
+                </option>
+                <option value="Düzenleyici">
+                  Düzenleyici (Taslak Hazırlama / Onaya Gönderme)
+                </option>
               </select>
             </div>
 
@@ -470,16 +739,26 @@ export default function YonetimClient() {
                   aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#536174] hover:text-[#111F35]"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
               <p className="mt-1 text-[12px] text-[#536174]">
-                Yetkili erişim şifresi: <code className="bg-[#F7F5EF] px-1.5 py-0.5 rounded font-mono text-[#111F35]">1998</code>
+                Yetkili erişim şifresi:{" "}
+                <code className="bg-[#F7F5EF] px-1.5 py-0.5 rounded font-mono text-[#111F35]">
+                  1998
+                </code>
               </p>
             </div>
 
             {authError && (
-              <p role="alert" className="text-[13px] text-red-600 bg-red-50 p-2.5 rounded-[8px]">
+              <p
+                role="alert"
+                className="text-[13px] text-red-600 bg-red-50 p-2.5 rounded-[8px]"
+              >
                 {authError}
               </p>
             )}
@@ -515,10 +794,11 @@ export default function YonetimClient() {
             <span>Aktif Yetki: {role}</span>
           </div>
           <h1 className="font-heading font-bold text-[22px] md:text-[26px] mt-1 text-white">
-            GAPSAN Yayın ve İçerik Kontrol Paneli
+            GAPSAN Yayın, Fotoğraf ve Ekspertiz Kontrol Paneli
           </h1>
           <p className="text-[13px] text-white/75 mt-0.5">
-            Otomotiv, İnşaat, Sigorta ve kurumsal iletişim ayarlarını anlık yönetin.
+            Çoklu fotoğraf yükleme, 13 parça ekspertiz raporu, detaylı açıklama
+            ve kurumsal ayarları yönetin.
           </p>
         </div>
 
@@ -530,7 +810,9 @@ export default function YonetimClient() {
             title="Önizleme / Demo Modunu Aç / Kapat"
           >
             <Eye className="w-3.5 h-3.5 text-[#D6A948]" />
-            <span>Mod: {previewMode ? "Önizleme (Demo Açık)" : "Canlı Mod"}</span>
+            <span>
+              Mod: {previewMode ? "Önizleme (Demo Açık)" : "Canlı Mod"}
+            </span>
           </button>
 
           <button
@@ -561,13 +843,19 @@ export default function YonetimClient() {
           <button
             type="button"
             onClick={() => {
-              if (confirm("Tüm veriler varsayılan orijinal değerlere sıfırlansın mı?")) {
+              if (
+                confirm(
+                  "Tüm veriler varsayılan demo ilanlara ve ayarlara sıfırlansın mı?"
+                )
+              ) {
                 resetStore();
-                setNotice("Tüm panel verileri orijinal durumuna sıfırlandı.");
+                setNotice(
+                  "Tüm panel verileri varsayılan demo ilanlara sıfırlandı."
+                );
               }
             }}
             className="min-h-[40px] px-3 rounded-[8px] bg-white/10 hover:bg-white/15 border border-white/20 text-white text-[12px] font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
-            title="Orijinal ayarlara sıfırla"
+            title="Varsayılan demo ilanlara sıfırla"
           >
             <RotateCcw className="w-3.5 h-3.5 text-orange-300" />
             <span className="hidden sm:inline">Sıfırla</span>
@@ -609,10 +897,22 @@ export default function YonetimClient() {
       <div className="flex flex-wrap gap-2 border-b border-[#E0E4EA] pb-3">
         {[
           { id: "arac", label: "Otomotiv İlanları", icon: Car },
-          { id: "gayrimenkul", label: "İnşaat & Gayrimenkul İlanları", icon: Building2 },
+          {
+            id: "gayrimenkul",
+            label: "İnşaat & Gayrimenkul İlanları",
+            icon: Building2,
+          },
           { id: "slayt", label: "Manşet / Slayt Yönetimi", icon: Eye },
-          { id: "yorum", label: "Müşteri Yorumları & Doğrulama", icon: ShieldCheck },
-          { id: "ayarlar", label: "Kurumsal & İletişim Ayarları", icon: Phone },
+          {
+            id: "yorum",
+            label: "Müşteri Yorumları & Doğrulama",
+            icon: ShieldCheck,
+          },
+          {
+            id: "ayarlar",
+            label: "Kurumsal & İletişim Ayarları",
+            icon: Phone,
+          },
         ].map((t) => {
           const Icon = t.icon;
           return (
@@ -639,25 +939,42 @@ export default function YonetimClient() {
           {/* Add Vehicle Form */}
           <form
             onSubmit={handleAddVehicle}
-            className="lg:col-span-5 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-3.5 shadow-xs"
+            className="lg:col-span-6 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-4 shadow-xs"
           >
             <div className="flex items-center justify-between border-b border-[#E0E4EA] pb-3">
-              <h2 className="font-heading font-bold text-[17px] text-[#111F35] flex items-center gap-2">
-                <Plus className="w-4 h-4 text-[#D6A948]" />
-                Yeni Araç İlanı Ekle
+              <h2 className="font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
+                <Plus className="w-5 h-5 text-[#D6A948]" />
+                Yeni Araç İlanı Ekle (Fotoğraflı &amp; Ekspertizli)
               </h2>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#F7F5EF] text-[#111F35]">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
                 {role === "Yayıncı" ? "Doğrudan Yayında" : "Taslak"}
               </span>
             </div>
 
+            {/* 1. Fotoğraf Yükleme Bölümü */}
+            <PhotoGalleryEditor
+              images={vImages}
+              onChange={setVImages}
+              presets={[
+                {
+                  label: "Galeri Görseli 1",
+                  url: "/assets/gapsan/gapsan-otomotiv-konsept.webp",
+                },
+                {
+                  label: "Galeri Görseli 2",
+                  url: "/assets/gapsan/gapsan-otomotiv-kart-konsept.webp",
+                },
+              ]}
+            />
+
+            {/* 2. Temel Araç Bilgileri */}
             <div>
               <label className="block text-[12px] font-semibold text-[#182538] mb-1">
                 İlan Başlığı *
               </label>
               <input
                 type="text"
-                placeholder="Örn: 2021 Renault Megane 1.5 dCi Joy"
+                placeholder="Örn: 2021 Volkswagen Passat 1.5 TSI Business DSG"
                 value={vTitle}
                 onChange={(e) => setVTitle(e.target.value)}
                 required
@@ -665,18 +982,18 @@ export default function YonetimClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               <div>
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
                   Marka *
                 </label>
                 <input
                   type="text"
-                  placeholder="Örn: Renault"
+                  placeholder="Örn: Volkswagen"
                   value={vBrand}
                   onChange={(e) => setVBrand(e.target.value)}
                   required
-                  className="w-full min-h-[42px] px-3 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
                 />
               </div>
               <div>
@@ -685,25 +1002,37 @@ export default function YonetimClient() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Örn: Megane"
+                  placeholder="Örn: Passat"
                   value={vModel}
                   onChange={(e) => setVModel(e.target.value)}
-                  className="w-full min-h-[42px] px-3 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
+                />
+              </div>
+              <div className="col-span-2 sm:col-span-1">
+                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  Paket / Donanım
+                </label>
+                <input
+                  type="text"
+                  placeholder="Örn: 1.5 TSI Business"
+                  value={vTrim}
+                  onChange={(e) => setVTrim(e.target.value)}
+                  className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <div>
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  Yıl
+                  Model Yılı
                 </label>
                 <input
                   type="number"
                   placeholder="2021"
                   value={vYear}
                   onChange={(e) => setVYear(e.target.value)}
-                  className="w-full min-h-[42px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  className="w-full min-h-[40px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[13px]"
                 />
               </div>
               <div>
@@ -715,7 +1044,7 @@ export default function YonetimClient() {
                   onChange={(e) =>
                     setVTrans(e.target.value as VehicleListing["transmission"])
                   }
-                  className="w-full min-h-[42px] px-2 rounded-[8px] border border-[#E0E4EA] text-[13px]"
+                  className="w-full min-h-[40px] px-2 rounded-[8px] border border-[#E0E4EA] text-[13px]"
                 >
                   <option value="Otomatik">Otomatik</option>
                   <option value="Manuel">Manuel</option>
@@ -724,27 +1053,12 @@ export default function YonetimClient() {
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  Kilometre
-                </label>
-                <input
-                  type="number"
-                  placeholder="85000"
-                  value={vKm}
-                  onChange={(e) => setVKm(e.target.value)}
-                  className="w-full min-h-[42px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[14px]"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
                   Yakıt Türü
                 </label>
                 <select
                   value={vFuel}
                   onChange={(e) => setVFuel(e.target.value)}
-                  className="w-full min-h-[42px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  className="w-full min-h-[40px] px-2 rounded-[8px] border border-[#E0E4EA] text-[13px]"
                 >
                   <option value="Dizel">Dizel</option>
                   <option value="Benzin">Benzin</option>
@@ -755,55 +1069,195 @@ export default function YonetimClient() {
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  Fiyat
+                  Kilometre
                 </label>
                 <input
-                  type="text"
-                  placeholder="Örn: 980.000 TL"
-                  value={vPrice}
-                  onChange={(e) => setVPrice(e.target.value)}
-                  className="w-full min-h-[42px] px-3 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  type="number"
+                  placeholder="64000"
+                  value={vKm}
+                  onChange={(e) => setVKm(e.target.value)}
+                  className="w-full min-h-[40px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[13px]"
                 />
               </div>
             </div>
 
+            <div className="grid grid-cols-3 gap-2.5">
+              <div>
+                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  Fiyat
+                </label>
+                <input
+                  type="text"
+                  placeholder="Örn: 1.685.000 TL"
+                  value={vPrice}
+                  onChange={(e) => setVPrice(e.target.value)}
+                  className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px] font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  Motor Gücü
+                </label>
+                <input
+                  type="text"
+                  placeholder="Örn: 150 HP"
+                  value={vHorsepower}
+                  onChange={(e) => setVHorsepower(e.target.value)}
+                  className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
+                />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  Renk
+                </label>
+                <input
+                  type="text"
+                  placeholder="Örn: Beyaz / Gri"
+                  value={vColor}
+                  onChange={(e) => setVColor(e.target.value)}
+                  className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
+                />
+              </div>
+            </div>
+
+            {/* 3. Detaylı Açıklama Bölümü */}
             <div>
-              <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                Ekspertiz / Hasar Kaydı
+              <label className="block text-[12px] font-bold text-[#111F35] mb-1">
+                Detaylı İlan Açıklaması (Araç Kondisyonu, Bakım, Senet / Takas Bilgisi)
               </label>
-              <input
-                type="text"
-                placeholder="Örn: Hatasız, boyasız, tramer kaydı yok"
-                value={vDamage}
-                onChange={(e) => setVDamage(e.target.value)}
-                className="w-full min-h-[42px] px-3 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+              <textarea
+                rows={4}
+                placeholder="Aracın bakım geçmişi, kozmetik durumu, yedek anahtar, kredi/senet/takas koşulları gibi tüm detayları buraya yazabilirsiniz..."
+                value={vDescription}
+                onChange={(e) => setVDescription(e.target.value)}
+                className="w-full p-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
               />
             </div>
 
+            {/* 4. Detaylı Ekspertiz Bölümü (13 Parça + Tramer + Not) */}
+            <div className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] space-y-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E0E4EA] pb-2.5">
+                <span className="text-[14px] font-bold text-[#111F35] flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#D6A948]" />
+                  <span>Ekspertiz Raporu &amp; Hasar / Boya Tablosu</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVExpertiseReport({ ...DEFAULT_EXPERTISE_REPORT });
+                    setVDamage("Hatasız • Boyasız • Değişensiz");
+                    setVTramer("Tramer Kaydı Yok (0 TL)");
+                  }}
+                  className="text-[11px] font-bold px-2.5 py-1 rounded bg-emerald-700 text-white hover:bg-emerald-800 cursor-pointer"
+                >
+                  ✓ Tümünü Orijinal / Hatasız İşaretle
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Genel Ekspertiz Özeti (Kartta Görünür)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Örn: Hatasız • Boyasız • Değişensiz"
+                    value={vDamage}
+                    onChange={(e) => setVDamage(e.target.value)}
+                    className="w-full min-h-[38px] px-2.5 rounded-[6px] border border-[#E0E4EA] bg-white text-[12px] font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Tramer / Hasar Kaydı Tutarı
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Örn: Tramer Kaydı Yok (0 TL)"
+                    value={vTramer}
+                    onChange={(e) => setVTramer(e.target.value)}
+                    className="w-full min-h-[38px] px-2.5 rounded-[6px] border border-[#E0E4EA] bg-white text-[12px]"
+                  />
+                </div>
+              </div>
+
+              {/* 13 Parça Seçici */}
+              <div>
+                <p className="text-[11px] font-semibold text-[#536174] mb-2">
+                  Parça Bazlı Ekspertiz Durumu (Parçanın durumunu seçin):
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {VEHICLE_PARTS.map((part) => {
+                    const currentStatus =
+                      vExpertiseReport[part.key] || "Orijinal";
+                    return (
+                      <div
+                        key={part.key}
+                        className={`px-2.5 py-1.5 rounded-[6px] border flex items-center justify-between gap-2 ${EXPERTISE_COLOR_MAP[currentStatus]}`}
+                      >
+                        <span className="text-[12px] font-semibold truncate">
+                          {part.label}
+                        </span>
+                        <select
+                          value={currentStatus}
+                          onChange={(e) =>
+                            setVExpertiseReport((prev) => ({
+                              ...prev,
+                              [part.key]: e.target.value as ExpertiseStatus,
+                            }))
+                          }
+                          className="text-[11px] font-bold bg-white/90 text-[#111F35] px-1.5 py-0.5 rounded border border-black/10 cursor-pointer"
+                        >
+                          {EXPERTISE_STATUSES.map((st) => (
+                            <option key={st} value={st}>
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                  Ek Ekspertiz Notu (Şase, Podye, Direkler, Airbag, Motor Durumu)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Örn: Şase, podye, direkler ve airbagler tamamen orijinaldir. Motor performansı %94..."
+                  value={vExpertiseNotes}
+                  onChange={(e) => setVExpertiseNotes(e.target.value)}
+                  className="w-full p-2.5 rounded-[6px] border border-[#E0E4EA] bg-white text-[12px]"
+                />
+              </div>
+            </div>
+
+            {/* 5. Araç Donanım & Satış Özellikleri */}
             <div>
-              <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                Araç Görseli (URL veya Hazır Seçim)
+              <label className="block text-[12px] font-bold text-[#111F35] mb-1.5">
+                Donanım &amp; Satış Özellikleri (Seçmek için tıklayın)
               </label>
-              <input
-                type="text"
-                value={vImage}
-                onChange={(e) => setVImage(e.target.value)}
-                className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
-              />
-              <div className="flex flex-wrap gap-1.5 mt-1.5">
-                {[
-                  { label: "Galeri Konsepti", url: "/assets/gapsan/gapsan-otomotiv-kart-konsept.webp" },
-                  { label: "Lüks Galeri", url: "/assets/gapsan/gapsan-otomotiv-konsept.webp" },
-                ].map((preset) => (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    onClick={() => setVImage(preset.url)}
-                    className="text-[11px] px-2 py-0.5 rounded border border-[#E0E4EA] bg-[#F7F5EF] hover:bg-white text-[#111F35]"
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-1.5">
+                {VEHICLE_FEATURES_LIST.map((feat) => {
+                  const active = vFeatures.includes(feat);
+                  return (
+                    <button
+                      key={feat}
+                      type="button"
+                      onClick={() => toggleFeature(vFeatures, setVFeatures, feat)}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-pointer transition-colors ${
+                        active
+                          ? "bg-[#111F35] text-[#D6A948] border-[#111F35]"
+                          : "bg-[#F7F5EF] text-[#536174] border-[#E0E4EA] hover:bg-white"
+                      }`}
+                    >
+                      {active ? "✓ " : "+ "}
+                      {feat}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -815,7 +1269,7 @@ export default function YonetimClient() {
                   onChange={(e) => setVEids(e.target.checked)}
                   className="accent-[#111F35]"
                 />
-                <span>EİDS Taşınmaz &amp; Taşıt Doğrulama Kapsamında</span>
+                <span>EİDS Taşıt Doğrulama Kapsamında</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -824,7 +1278,10 @@ export default function YonetimClient() {
                   onChange={(e) => setVAuth(e.target.checked)}
                   className="accent-[#111F35]"
                 />
-                <span>İkinci El Motorlu Kara Taşıtı Ticareti Yetki Belgesi Onaylı (340 6225)</span>
+                <span>
+                  İkinci El Motorlu Kara Taşıtı Ticareti Yetki Belgesi Onaylı
+                  (340 6225)
+                </span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -839,14 +1296,16 @@ export default function YonetimClient() {
 
             <button
               type="submit"
-              className="w-full min-h-[44px] rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-bold text-[14px] cursor-pointer transition-colors"
+              className="w-full min-h-[46px] rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-extrabold text-[15px] cursor-pointer transition-colors"
             >
-              {role === "Yayıncı" ? "İlanı Canlıya Ekle" : "İlanı Taslak Olarak Ekle"}
+              {role === "Yayıncı"
+                ? "Araç İlanını Şimdi Yayınla"
+                : "İlanı Taslak Olarak Kaydet"}
             </button>
           </form>
 
           {/* Vehicle List */}
-          <div className="lg:col-span-7 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-4 shadow-xs">
+          <div className="lg:col-span-6 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-4 shadow-xs">
             <div className="flex items-center justify-between border-b border-[#E0E4EA] pb-3">
               <h2 className="font-heading font-bold text-[18px] text-[#111F35]">
                 Kayıtlı Araç İlanları ({vehicles.length})
@@ -868,7 +1327,8 @@ export default function YonetimClient() {
                   Henüz kayıtlı araç ilanı yok
                 </p>
                 <p className="text-[12px] text-[#536174]">
-                  Soldaki formdan yeni bir araç eklediğinizde sitede anında listelenecektir.
+                  Soldaki formdan fotoğraflı ve ekspertizli yeni araç ilanı
+                  ekleyebilirsiniz.
                 </p>
               </div>
             ) : (
@@ -876,43 +1336,70 @@ export default function YonetimClient() {
                 {vehicles.map((v) => (
                   <div
                     key={v.id}
-                    className="p-3.5 rounded-[10px] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    className="p-3.5 rounded-[10px] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors space-y-3"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-[6px] overflow-hidden bg-[#111F35] shrink-0">
-                        <img
-                          src={v.images[0] || "/assets/gapsan/gapsan-otomotiv-kart-konsept.webp"}
-                          alt={v.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-bold text-[14px] text-[#111F35]">{v.title}</p>
-                        <p className="text-[12px] text-[#536174]">
-                          {v.year} &bull; {v.transmission} &bull;{" "}
-                          {v.km ? `${v.km.toLocaleString("tr-TR")} km` : "Km belirtilmedi"}{" "}
-                          &bull;{" "}
-                          <strong className="text-[#111F35]">{v.price || "Fiyat Sorunuz"}</strong>
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span
-                            className={`text-[11px] font-bold px-2 py-0.5 rounded ${
-                              v.status === "Yayında"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : v.status === "Taslak"
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
-                          >
-                            {v.status}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-16 h-16 rounded-[6px] overflow-hidden bg-[#111F35] shrink-0 relative">
+                          <img
+                            src={
+                              v.images[0] ||
+                              "/assets/gapsan/gapsan-otomotiv-kart-konsept.webp"
+                            }
+                            alt={v.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <span className="absolute bottom-0.5 right-0.5 px-1 rounded bg-black/75 text-white text-[9px] font-bold">
+                            {v.images.length} Foto
                           </span>
                         </div>
+                        <div>
+                          <Link
+                            href={`/otomotiv/ilan/${v.slug}`}
+                            className="font-bold text-[14px] text-[#111F35] hover:text-[#D6A948] block"
+                          >
+                            {v.title}
+                          </Link>
+                          <p className="text-[12px] text-[#536174]">
+                            {v.year} &bull; {v.fuel} &bull; {v.transmission}{" "}
+                            &bull;{" "}
+                            {v.km
+                              ? `${v.km.toLocaleString("tr-TR")} km`
+                              : "Km yok"}{" "}
+                            &bull;{" "}
+                            <strong className="text-[#111F35]">
+                              {v.price || "Fiyat Sorunuz"}
+                            </strong>
+                          </p>
+                          <p className="text-[11px] text-emerald-800 font-semibold mt-0.5">
+                            Ekspertiz: {v.damageInfo || "Onaylı"}
+                          </p>
+                        </div>
                       </div>
+
+                      <span
+                        className={`text-[11px] font-bold px-2 py-0.5 rounded shrink-0 ${
+                          v.status === "Yayında"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : v.status === "Taslak"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {v.status}
+                      </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1.5 self-end sm:self-center">
-                      {(["Taslak", "Onay bekliyor", "Yayında", "Arşiv"] as PublishStatus[]).map(
-                        (st) => (
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#E0E4EA]">
+                      <div className="flex flex-wrap items-center gap-1">
+                        {(
+                          [
+                            "Taslak",
+                            "Onay bekliyor",
+                            "Yayında",
+                            "Arşiv",
+                          ] as PublishStatus[]
+                        ).map((st) => (
                           <button
                             key={st}
                             type="button"
@@ -925,31 +1412,56 @@ export default function YonetimClient() {
                           >
                             {st}
                           </button>
-                        )
-                      )}
+                        ))}
+                      </div>
 
-                      <button
-                        type="button"
-                        onClick={() => setEditingVehicle(v)}
-                        className="p-1.5 text-[#111F35] hover:bg-[#F7F5EF] rounded border border-[#E0E4EA] cursor-pointer"
-                        title="İlanı Düzenle"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          href={`/otomotiv/ilan/${v.slug}`}
+                          className="px-2.5 py-1 rounded text-[11px] font-bold bg-[#F7F5EF] hover:bg-[#D6A948] text-[#111F35] border border-[#E0E4EA] inline-flex items-center gap-1"
+                        >
+                          <Eye className="w-3 h-3" />
+                          <span>İlanı İncele</span>
+                        </Link>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`'${v.title}' ilanını silmek istediğinize emin misiniz?`)) {
-                            setVehicles((prev) => prev.filter((x) => x.id !== v.id));
-                            setNotice(`'${v.title}' silindi.`);
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditingVehicle({
+                              ...v,
+                              expertiseReport: v.expertiseReport || {
+                                ...DEFAULT_EXPERTISE_REPORT,
+                              },
+                              features: v.features || [],
+                            })
                           }
-                        }}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded border border-red-200 cursor-pointer"
-                        title="İlanı Sil"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                          className="px-2.5 py-1 text-[11px] font-bold text-[#111F35] hover:bg-[#F7F5EF] rounded border border-[#E0E4EA] inline-flex items-center gap-1 cursor-pointer"
+                          title="Fotoğraf, Açıklama ve Ekspertizi Düzenle"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                          <span>Düzenle</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (
+                              confirm(
+                                `'${v.title}' ilanını silmek istediğinize emin misiniz?`
+                              )
+                            ) {
+                              setVehicles((prev) =>
+                                prev.filter((x) => x.id !== v.id)
+                              );
+                              setNotice(`'${v.title}' silindi.`);
+                            }
+                          }}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded border border-red-200 cursor-pointer"
+                          title="İlanı Sil"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -965,17 +1477,33 @@ export default function YonetimClient() {
           {/* Add Real Estate Form */}
           <form
             onSubmit={handleAddRealEstate}
-            className="lg:col-span-5 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-3.5 shadow-xs"
+            className="lg:col-span-6 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-4 shadow-xs"
           >
             <div className="flex items-center justify-between border-b border-[#E0E4EA] pb-3">
-              <h2 className="font-heading font-bold text-[17px] text-[#111F35] flex items-center gap-2">
-                <Plus className="w-4 h-4 text-[#D6A948]" />
-                Yeni Taşınmaz İlanı Ekle
+              <h2 className="font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
+                <Plus className="w-5 h-5 text-[#D6A948]" />
+                Yeni İnşaat &amp; Gayrimenkul İlanı Ekle
               </h2>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#F7F5EF] text-[#111F35]">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
                 {role === "Yayıncı" ? "Doğrudan Yayında" : "Taslak"}
               </span>
             </div>
+
+            {/* 1. Çoklu Fotoğraf Yükleme */}
+            <PhotoGalleryEditor
+              images={rImages}
+              onChange={setRImages}
+              presets={[
+                {
+                  label: "Modern Konut",
+                  url: "/assets/gapsan/gapsan-gayrimenkul-konsept.webp",
+                },
+                {
+                  label: "Proje / Ticari",
+                  url: "/assets/gapsan/gapsan-og-gayrimenkul.webp",
+                },
+              ]}
+            />
 
             <div>
               <label className="block text-[12px] font-semibold text-[#182538] mb-1">
@@ -983,7 +1511,7 @@ export default function YonetimClient() {
               </label>
               <input
                 type="text"
-                placeholder="Örn: Esenyurt Merkez 3+1 Sıfır Lüks Daire"
+                placeholder="Örn: Esenyurt Üçevler Torium Yakını Sıfır 3+1 Lüks Daire"
                 value={rTitle}
                 onChange={(e) => setRTitle(e.target.value)}
                 required
@@ -991,15 +1519,17 @@ export default function YonetimClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               <div>
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
                   İşlem Türü
                 </label>
                 <select
                   value={rType}
-                  onChange={(e) => setRType(e.target.value as "Satılık" | "Kiralık")}
-                  className="w-full min-h-[42px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  onChange={(e) =>
+                    setRType(e.target.value as "Satılık" | "Kiralık")
+                  }
+                  className="w-full min-h-[40px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[13px]"
                 >
                   <option value="Satılık">Satılık</option>
                   <option value="Kiralık">Kiralık</option>
@@ -1012,9 +1542,11 @@ export default function YonetimClient() {
                 <select
                   value={rPropType}
                   onChange={(e) =>
-                    setRPropType(e.target.value as RealEstateListing["propertyType"])
+                    setRPropType(
+                      e.target.value as RealEstateListing["propertyType"]
+                    )
                   }
-                  className="w-full min-h-[42px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  className="w-full min-h-[40px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[13px]"
                 >
                   <option value="Daire">Daire</option>
                   <option value="İş Yeri">İş Yeri</option>
@@ -1023,12 +1555,9 @@ export default function YonetimClient() {
                   <option value="Bina">Bina</option>
                 </select>
               </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <div>
+              <div className="col-span-2 sm:col-span-1">
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  İlçe *
+                  İlçe / Bölge *
                 </label>
                 <input
                   type="text"
@@ -1036,85 +1565,137 @@ export default function YonetimClient() {
                   value={rDistrict}
                   onChange={(e) => setRDistrict(e.target.value)}
                   required
-                  className="w-full min-h-[42px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  className="w-full min-h-[40px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[13px]"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2.5">
+              <div>
+                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  Fiyat
+                </label>
+                <input
+                  type="text"
+                  placeholder="Örn: 3.650.000 TL"
+                  value={rPrice}
+                  onChange={(e) => setRPrice(e.target.value)}
+                  className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px] font-semibold"
                 />
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  m²
+                  Metrekare (m²)
                 </label>
                 <input
                   type="number"
-                  placeholder="120"
+                  placeholder="135"
                   value={rM2}
                   onChange={(e) => setRM2(e.target.value)}
-                  className="w-full min-h-[42px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  className="w-full min-h-[40px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[13px]"
                 />
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  Oda Sayısı
+                  Oda / Bölüm
                 </label>
                 <input
                   type="text"
                   placeholder="3+1"
                   value={rRooms}
                   onChange={(e) => setRRooms(e.target.value)}
-                  className="w-full min-h-[42px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[14px]"
+                  className="w-full min-h-[40px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[13px]"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div>
+                <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                  Bulunduğu Kat
+                </label>
+                <input
+                  type="text"
+                  placeholder="Örn: 3. Kat"
+                  value={rFloor}
+                  onChange={(e) => setRFloor(e.target.value)}
+                  className="w-full min-h-[38px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[12px]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                  Bina Yaşı
+                </label>
+                <input
+                  type="text"
+                  placeholder="Örn: 0 (Sıfır)"
+                  value={rBuildingAge}
+                  onChange={(e) => setRBuildingAge(e.target.value)}
+                  className="w-full min-h-[38px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[12px]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                  Isıtma
+                </label>
+                <input
+                  type="text"
+                  placeholder="Kombi (Doğalgaz)"
+                  value={rHeating}
+                  onChange={(e) => setRHeating(e.target.value)}
+                  className="w-full min-h-[38px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[12px]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                  Tapu Durumu
+                </label>
+                <input
+                  type="text"
+                  placeholder="Kat Mülkiyetli"
+                  value={rDeedStatus}
+                  onChange={(e) => setRDeedStatus(e.target.value)}
+                  className="w-full min-h-[38px] px-2.5 rounded-[8px] border border-[#E0E4EA] text-[12px]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                Fiyat
-              </label>
-              <input
-                type="text"
-                placeholder="Örn: 3.450.000 TL"
-                value={rPrice}
-                onChange={(e) => setRPrice(e.target.value)}
-                className="w-full min-h-[42px] px-3 rounded-[8px] border border-[#E0E4EA] text-[14px]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                Açıklama
+              <label className="block text-[12px] font-bold text-[#111F35] mb-1">
+                Detaylı Taşınmaz Açıklaması
               </label>
               <textarea
-                rows={2}
-                placeholder="Örn: Metroya ve caddeye yakın, krediye uygun sıfır daire..."
+                rows={3}
+                placeholder="Konumu, ulaşım imkanları, daire/dükkan özellikleri, kredi ve takas uygunluğu..."
                 value={rDesc}
                 onChange={(e) => setRDesc(e.target.value)}
-                className="w-full p-2.5 rounded-[8px] border border-[#E0E4EA] text-[13px]"
+                className="w-full p-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
               />
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                Görsel URL
+              <label className="block text-[12px] font-bold text-[#111F35] mb-1.5">
+                Taşınmaz Özellikleri (Seçmek için tıklayın)
               </label>
-              <input
-                type="text"
-                value={rImage}
-                onChange={(e) => setRImage(e.target.value)}
-                className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
-              />
-              <div className="flex flex-wrap gap-1.5 mt-1.5">
-                {[
-                  { label: "Modern Apartman", url: "/assets/gapsan/gapsan-gayrimenkul-konsept.webp" },
-                  { label: "Rezidan / Proje", url: "/assets/gapsan/gapsan-og-gayrimenkul.webp" },
-                ].map((preset) => (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    onClick={() => setRImage(preset.url)}
-                    className="text-[11px] px-2 py-0.5 rounded border border-[#E0E4EA] bg-[#F7F5EF] hover:bg-white text-[#111F35]"
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-1.5">
+                {REAL_ESTATE_FEATURES_LIST.map((feat) => {
+                  const active = rFeatures.includes(feat);
+                  return (
+                    <button
+                      key={feat}
+                      type="button"
+                      onClick={() => toggleFeature(rFeatures, setRFeatures, feat)}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-pointer transition-colors ${
+                        active
+                          ? "bg-[#111F35] text-[#D6A948] border-[#111F35]"
+                          : "bg-[#F7F5EF] text-[#536174] border-[#E0E4EA] hover:bg-white"
+                      }`}
+                    >
+                      {active ? "✓ " : "+ "}
+                      {feat}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -1144,20 +1725,22 @@ export default function YonetimClient() {
                   onChange={(e) => setRSource(e.target.checked)}
                   className="accent-[#111F35]"
                 />
-                <span>Tapu &amp; Ruhsat Kayıtları Doğrulandı</span>
+                <span>Tapu &amp; İskan Kayıtları Doğrulandı</span>
               </label>
             </div>
 
             <button
               type="submit"
-              className="w-full min-h-[44px] rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-bold text-[14px] cursor-pointer transition-colors"
+              className="w-full min-h-[46px] rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-extrabold text-[15px] cursor-pointer transition-colors"
             >
-              {role === "Yayıncı" ? "İlanı Canlıya Ekle" : "İlanı Taslak Olarak Ekle"}
+              {role === "Yayıncı"
+                ? "Taşınmaz İlanını Şimdi Yayınla"
+                : "İlanı Taslak Olarak Kaydet"}
             </button>
           </form>
 
           {/* Real Estate List */}
-          <div className="lg:col-span-7 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-4 shadow-xs">
+          <div className="lg:col-span-6 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-4 shadow-xs">
             <div className="flex items-center justify-between border-b border-[#E0E4EA] pb-3">
               <h2 className="font-heading font-bold text-[18px] text-[#111F35]">
                 Kayıtlı Taşınmaz İlanları ({realEstates.length})
@@ -1179,7 +1762,8 @@ export default function YonetimClient() {
                   Henüz kayıtlı taşınmaz ilanı yok
                 </p>
                 <p className="text-[12px] text-[#536174]">
-                  Soldaki formdan yeni bir satılık veya kiralık gayrimenkul ekleyebilirsiniz.
+                  Soldaki formdan yeni bir satılık veya kiralık gayrimenkul
+                  ekleyebilirsiniz.
                 </p>
               </div>
             ) : (
@@ -1187,44 +1771,67 @@ export default function YonetimClient() {
                 {realEstates.map((r) => (
                   <div
                     key={r.id}
-                    className="p-3.5 rounded-[10px] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    className="p-3.5 rounded-[10px] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors space-y-3"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-[6px] overflow-hidden bg-[#111F35] shrink-0">
-                        <img
-                          src={r.images[0] || "/assets/gapsan/gapsan-gayrimenkul-konsept.webp"}
-                          alt={r.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-bold text-[14px] text-[#111F35]">
-                          {r.title} ({r.listingType})
-                        </p>
-                        <p className="text-[12px] text-[#536174]">
-                          {r.district} &bull; {r.propertyType} &bull;{" "}
-                          {r.areaM2 ? `${r.areaM2} m²` : ""} &bull; {r.rooms} &bull;{" "}
-                          <strong className="text-[#111F35]">{r.price || "Fiyat Sorunuz"}</strong>
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span
-                            className={`text-[11px] font-bold px-2 py-0.5 rounded ${
-                              r.status === "Yayında"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : r.status === "Taslak"
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
-                          >
-                            {r.status}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-16 h-16 rounded-[6px] overflow-hidden bg-[#111F35] shrink-0 relative">
+                          <img
+                            src={
+                              r.images[0] ||
+                              "/assets/gapsan/gapsan-gayrimenkul-konsept.webp"
+                            }
+                            alt={r.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <span className="absolute bottom-0.5 right-0.5 px-1 rounded bg-black/75 text-white text-[9px] font-bold">
+                            {r.images.length} Foto
                           </span>
                         </div>
+                        <div>
+                          <Link
+                            href={`/gayrimenkul/ilan/${r.slug}`}
+                            className="font-bold text-[14px] text-[#111F35] hover:text-[#D6A948] block"
+                          >
+                            {r.title}
+                          </Link>
+                          <p className="text-[12px] text-[#536174]">
+                            <span className="font-semibold text-[#111F35]">
+                              {r.listingType}
+                            </span>{" "}
+                            &bull; {r.district} &bull; {r.propertyType} &bull;{" "}
+                            {r.areaM2 ? `${r.areaM2} m²` : ""} &bull; {r.rooms}{" "}
+                            &bull;{" "}
+                            <strong className="text-[#111F35]">
+                              {r.price || "Fiyat Sorunuz"}
+                            </strong>
+                          </p>
+                        </div>
                       </div>
+
+                      <span
+                        className={`text-[11px] font-bold px-2 py-0.5 rounded shrink-0 ${
+                          r.status === "Yayında"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : r.status === "Taslak"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {r.status}
+                      </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1.5 self-end sm:self-center">
-                      {(["Taslak", "Onay bekliyor", "Yayında", "Arşiv"] as PublishStatus[]).map(
-                        (st) => (
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#E0E4EA]">
+                      <div className="flex flex-wrap items-center gap-1">
+                        {(
+                          [
+                            "Taslak",
+                            "Onay bekliyor",
+                            "Yayında",
+                            "Arşiv",
+                          ] as PublishStatus[]
+                        ).map((st) => (
                           <button
                             key={st}
                             type="button"
@@ -1237,31 +1844,53 @@ export default function YonetimClient() {
                           >
                             {st}
                           </button>
-                        )
-                      )}
+                        ))}
+                      </div>
 
-                      <button
-                        type="button"
-                        onClick={() => setEditingRealEstate(r)}
-                        className="p-1.5 text-[#111F35] hover:bg-[#F7F5EF] rounded border border-[#E0E4EA] cursor-pointer"
-                        title="İlanı Düzenle"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          href={`/gayrimenkul/ilan/${r.slug}`}
+                          className="px-2.5 py-1 rounded text-[11px] font-bold bg-[#F7F5EF] hover:bg-[#D6A948] text-[#111F35] border border-[#E0E4EA] inline-flex items-center gap-1"
+                        >
+                          <Eye className="w-3 h-3" />
+                          <span>İlanı İncele</span>
+                        </Link>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`'${r.title}' ilanını silmek istediğinize emin misiniz?`)) {
-                            setRealEstates((prev) => prev.filter((x) => x.id !== r.id));
-                            setNotice(`'${r.title}' silindi.`);
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditingRealEstate({
+                              ...r,
+                              features: r.features || [],
+                            })
                           }
-                        }}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded border border-red-200 cursor-pointer"
-                        title="İlanı Sil"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                          className="px-2.5 py-1 text-[11px] font-bold text-[#111F35] hover:bg-[#F7F5EF] rounded border border-[#E0E4EA] inline-flex items-center gap-1 cursor-pointer"
+                          title="İlanı ve Fotoğrafları Düzenle"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                          <span>Düzenle</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (
+                              confirm(
+                                `'${r.title}' ilanını silmek istediğinize emin misiniz?`
+                              )
+                            ) {
+                              setRealEstates((prev) =>
+                                prev.filter((x) => x.id !== r.id)
+                              );
+                              setNotice(`'${r.title}' silindi.`);
+                            }
+                          }}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded border border-red-200 cursor-pointer"
+                          title="İlanı Sil"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1280,7 +1909,8 @@ export default function YonetimClient() {
                 Ana Sayfa Açılış Manşetleri (Hero Slaytları)
               </h2>
               <p className="text-[13px] text-[#536174]">
-                Ziyaretçilerin ilk gördüğü ana manşet metinlerini, buton yazılarını ve odak ayarlarını buradan yönetebilirsiniz.
+                Ziyaretçilerin ilk gördüğü ana manşet metinlerini, buton
+                yazılarını ve odak ayarlarını buradan yönetebilirsiniz.
               </p>
             </div>
             <Link
@@ -1300,7 +1930,7 @@ export default function YonetimClient() {
                 className="p-4 rounded-[10px] border border-[#E0E4EA] bg-[#F7F5EF]/50 space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-[14px] text-[#111F35] bg-[#D6A948]/20 text-[#111F35] px-2.5 py-0.5 rounded">
+                  <span className="font-bold text-[14px] text-[#111F35] bg-[#D6A948]/20 px-2.5 py-0.5 rounded">
                     Slayt {idx + 1}
                   </span>
                   <span className="text-[11px] text-[#536174]">{s.id}</span>
@@ -1316,7 +1946,9 @@ export default function YonetimClient() {
                     onChange={(e) => {
                       const val = e.target.value;
                       setSlides((prev) =>
-                        prev.map((x) => (x.id === s.id ? { ...x, heading: val } : x))
+                        prev.map((x) =>
+                          x.id === s.id ? { ...x, heading: val } : x
+                        )
                       );
                     }}
                     className="w-full min-h-[40px] px-3 rounded-[6px] border border-[#E0E4EA] bg-white text-[13px] font-medium"
@@ -1334,7 +1966,9 @@ export default function YonetimClient() {
                       onChange={(e) => {
                         const val = e.target.value;
                         setSlides((prev) =>
-                          prev.map((x) => (x.id === s.id ? { ...x, ctaLabel: val } : x))
+                          prev.map((x) =>
+                            x.id === s.id ? { ...x, ctaLabel: val } : x
+                          )
                         );
                       }}
                       className="w-full min-h-[36px] px-2.5 rounded-[6px] border border-[#E0E4EA] bg-white text-[12px]"
@@ -1350,7 +1984,9 @@ export default function YonetimClient() {
                       onChange={(e) => {
                         const val = e.target.value;
                         setSlides((prev) =>
-                          prev.map((x) => (x.id === s.id ? { ...x, ctaHref: val } : x))
+                          prev.map((x) =>
+                            x.id === s.id ? { ...x, ctaHref: val } : x
+                          )
                         );
                       }}
                       className="w-full min-h-[36px] px-2.5 rounded-[6px] border border-[#E0E4EA] bg-white text-[12px]"
@@ -1369,7 +2005,9 @@ export default function YonetimClient() {
                     onChange={(e) => {
                       const val = e.target.value;
                       setSlides((prev) =>
-                        prev.map((x) => (x.id === s.id ? { ...x, location: val } : x))
+                        prev.map((x) =>
+                          x.id === s.id ? { ...x, location: val } : x
+                        )
                       );
                     }}
                     className="w-full min-h-[36px] px-2.5 rounded-[6px] border border-[#E0E4EA] bg-white text-[12px]"
@@ -1382,7 +2020,9 @@ export default function YonetimClient() {
           <div className="pt-2 text-right">
             <button
               type="button"
-              onClick={() => setNotice("Manşet ve slayt değişiklikleri kaydedildi.")}
+              onClick={() =>
+                setNotice("Manşet ve slayt değişiklikleri kaydedildi.")
+              }
               className="min-h-[42px] px-5 rounded-[8px] bg-[#111F35] text-white font-semibold text-[14px] inline-flex items-center gap-2 cursor-pointer"
             >
               <Save className="w-4 h-4 text-[#D6A948]" />
@@ -1403,7 +2043,8 @@ export default function YonetimClient() {
               Yorum ve Gizli Doğrulama Kaydı Ekle
             </h2>
             <p className="text-[12px] text-[#536174]">
-              Ticaret Bakanlığı ve Tüketici Hakları gereğince yorumlar noter veya sözleşme işlem kaydıyla eşleştirilir.
+              Ticaret Bakanlığı ve Tüketici Hakları gereğince yorumlar noter
+              veya sözleşme işlem kaydıyla eşleştirilir.
             </p>
 
             <div>
@@ -1427,7 +2068,9 @@ export default function YonetimClient() {
               <select
                 value={revArea}
                 onChange={(e) =>
-                  setRevArea(e.target.value as "Otomotiv" | "Gayrimenkul" | "Sigorta")
+                  setRevArea(
+                    e.target.value as "Otomotiv" | "Gayrimenkul" | "Sigorta"
+                  )
                 }
                 className="w-full min-h-[42px] px-3 rounded-[8px] border border-[#E0E4EA] text-[14px]"
               >
@@ -1500,7 +2143,9 @@ export default function YonetimClient() {
             </h2>
 
             {reviews.length === 0 ? (
-              <p className="text-[14px] text-[#536174]">Henüz kayıtlı müşteri yorumu bulunmuyor.</p>
+              <p className="text-[14px] text-[#536174]">
+                Henüz kayıtlı müşteri yorumu bulunmuyor.
+              </p>
             ) : (
               <div className="space-y-3">
                 {reviews.map((r) => (
@@ -1510,7 +2155,10 @@ export default function YonetimClient() {
                   >
                     <div className="flex items-center justify-between">
                       <p className="font-bold text-[14px] text-[#111F35]">
-                        {r.author} &bull; <span className="text-[#536174] font-normal">{r.area}</span>
+                        {r.author} &bull;{" "}
+                        <span className="text-[#536174] font-normal">
+                          {r.area}
+                        </span>
                       </p>
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
@@ -1518,7 +2166,11 @@ export default function YonetimClient() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => setReviews((prev) => prev.filter((x) => x.id !== r.id))}
+                          onClick={() =>
+                            setReviews((prev) =>
+                              prev.filter((x) => x.id !== r.id)
+                            )
+                          }
                           className="p-1 text-red-600 hover:bg-red-50 rounded"
                           title="Sil"
                         >
@@ -1526,9 +2178,12 @@ export default function YonetimClient() {
                         </button>
                       </div>
                     </div>
-                    <p className="text-[13px] text-[#182538] italic">“{r.comment}”</p>
+                    <p className="text-[13px] text-[#182538] italic">
+                      “{r.comment}”
+                    </p>
                     <div className="text-[11px] text-[#536174] bg-[#F7F5EF] p-2 rounded">
-                      🔒 <strong>Gizli Referans:</strong> {r.privateVerificationRef}
+                      🔒 <strong>Gizli Referans:</strong>{" "}
+                      {r.privateVerificationRef}
                     </div>
                   </div>
                 ))}
@@ -1549,11 +2204,11 @@ export default function YonetimClient() {
               Kurumsal Kimlik, Telefonlar ve E-Posta Ayarları
             </h2>
             <p className="text-[13px] text-[#536174] mt-0.5">
-              Tüm sitede, footer&apos;da ve iletişim sayfasında görünen bilgileri tek noktadan güncelleyin.
+              Tüm sitede, footer&apos;da ve iletişim sayfasında görünen
+              bilgileri tek noktadan güncelleyin.
             </p>
           </div>
 
-          {/* Temel Şirket Bilgileri */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-[12px] font-semibold text-[#182538] mb-1">
@@ -1563,7 +2218,10 @@ export default function YonetimClient() {
                 type="text"
                 value={settingsForm.companyLegalName}
                 onChange={(e) =>
-                  setSettingsForm((prev) => ({ ...prev, companyLegalName: e.target.value }))
+                  setSettingsForm((prev) => ({
+                    ...prev,
+                    companyLegalName: e.target.value,
+                  }))
                 }
                 className="w-full min-h-[42px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
               />
@@ -1576,7 +2234,10 @@ export default function YonetimClient() {
                 type="text"
                 value={settingsForm.founderName}
                 onChange={(e) =>
-                  setSettingsForm((prev) => ({ ...prev, founderName: e.target.value }))
+                  setSettingsForm((prev) => ({
+                    ...prev,
+                    founderName: e.target.value,
+                  }))
                 }
                 className="w-full min-h-[42px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
               />
@@ -1589,14 +2250,16 @@ export default function YonetimClient() {
                 type="text"
                 value={settingsForm.address}
                 onChange={(e) =>
-                  setSettingsForm((prev) => ({ ...prev, address: e.target.value }))
+                  setSettingsForm((prev) => ({
+                    ...prev,
+                    address: e.target.value,
+                  }))
                 }
                 className="w-full min-h-[42px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
               />
             </div>
           </div>
 
-          {/* Telefon Numaraları */}
           <div className="border-t border-[#E0E4EA] pt-5">
             <h3 className="font-heading font-bold text-[16px] text-[#111F35] mb-3">
               Birim Telefon Hatları
@@ -1613,7 +2276,10 @@ export default function YonetimClient() {
                     setSettingsForm((prev) => ({
                       ...prev,
                       generalPhoneDisplay: e.target.value,
-                      generalPhoneTel: `tel:${e.target.value.replace(/[^0-9+]/g, "")}`,
+                      generalPhoneTel: `tel:${e.target.value.replace(
+                        /[^0-9+]/g,
+                        ""
+                      )}`,
                     }))
                   }
                   className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px] font-semibold"
@@ -1635,7 +2301,10 @@ export default function YonetimClient() {
                         otomotiv: {
                           ...prev.units.otomotiv,
                           phoneDisplay: e.target.value,
-                          phoneTel: `tel:${e.target.value.replace(/[^0-9+]/g, "")}`,
+                          phoneTel: `tel:${e.target.value.replace(
+                            /[^0-9+]/g,
+                            ""
+                          )}`,
                         },
                       },
                     }))
@@ -1659,7 +2328,10 @@ export default function YonetimClient() {
                         gayrimenkul: {
                           ...prev.units.gayrimenkul,
                           phoneDisplay: e.target.value,
-                          phoneTel: `tel:${e.target.value.replace(/[^0-9+]/g, "")}`,
+                          phoneTel: `tel:${e.target.value.replace(
+                            /[^0-9+]/g,
+                            ""
+                          )}`,
                         },
                       },
                     }))
@@ -1683,7 +2355,10 @@ export default function YonetimClient() {
                         sigorta: {
                           ...prev.units.sigorta,
                           phoneDisplay: e.target.value,
-                          phoneTel: `tel:${e.target.value.replace(/[^0-9+]/g, "")}`,
+                          phoneTel: `tel:${e.target.value.replace(
+                            /[^0-9+]/g,
+                            ""
+                          )}`,
                         },
                       },
                     }))
@@ -1694,7 +2369,6 @@ export default function YonetimClient() {
             </div>
           </div>
 
-          {/* E-Posta Adresleri */}
           <div className="border-t border-[#E0E4EA] pt-5">
             <h3 className="font-heading font-bold text-[16px] text-[#111F35] mb-3">
               Kurumsal E-Posta Adresleri
@@ -1774,7 +2448,6 @@ export default function YonetimClient() {
             </div>
           </div>
 
-          {/* Sosyal Medya ve WhatsApp Kanalı */}
           <div className="border-t border-[#E0E4EA] pt-5">
             <h3 className="font-heading font-bold text-[16px] text-[#111F35] mb-3">
               Sosyal Medya &amp; WhatsApp Kanal Linkleri
@@ -1790,7 +2463,10 @@ export default function YonetimClient() {
                   onChange={(e) =>
                     setSettingsForm((prev) => ({
                       ...prev,
-                      socialMedia: { ...prev.socialMedia, whatsappChannel: e.target.value },
+                      socialMedia: {
+                        ...prev.socialMedia,
+                        whatsappChannel: e.target.value,
+                      },
                     }))
                   }
                   className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
@@ -1807,7 +2483,10 @@ export default function YonetimClient() {
                   onChange={(e) =>
                     setSettingsForm((prev) => ({
                       ...prev,
-                      socialMedia: { ...prev.socialMedia, facebook: e.target.value },
+                      socialMedia: {
+                        ...prev.socialMedia,
+                        facebook: e.target.value,
+                      },
                     }))
                   }
                   className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
@@ -1824,7 +2503,10 @@ export default function YonetimClient() {
                   onChange={(e) =>
                     setSettingsForm((prev) => ({
                       ...prev,
-                      socialMedia: { ...prev.socialMedia, instagramOtomotiv: e.target.value },
+                      socialMedia: {
+                        ...prev.socialMedia,
+                        instagramOtomotiv: e.target.value,
+                      },
                     }))
                   }
                   className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
@@ -1841,7 +2523,10 @@ export default function YonetimClient() {
                   onChange={(e) =>
                     setSettingsForm((prev) => ({
                       ...prev,
-                      socialMedia: { ...prev.socialMedia, tiktokOtomotiv: e.target.value },
+                      socialMedia: {
+                        ...prev.socialMedia,
+                        tiktokOtomotiv: e.target.value,
+                      },
                     }))
                   }
                   className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
@@ -1858,7 +2543,10 @@ export default function YonetimClient() {
                   onChange={(e) =>
                     setSettingsForm((prev) => ({
                       ...prev,
-                      socialMedia: { ...prev.socialMedia, instagramGayrimenkul: e.target.value },
+                      socialMedia: {
+                        ...prev.socialMedia,
+                        instagramGayrimenkul: e.target.value,
+                      },
                     }))
                   }
                   className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
@@ -1875,7 +2563,10 @@ export default function YonetimClient() {
                   onChange={(e) =>
                     setSettingsForm((prev) => ({
                       ...prev,
-                      socialMedia: { ...prev.socialMedia, tiktokGayrimenkul: e.target.value },
+                      socialMedia: {
+                        ...prev.socialMedia,
+                        tiktokGayrimenkul: e.target.value,
+                      },
                     }))
                   }
                   className="w-full min-h-[40px] px-3 rounded-[8px] border border-[#E0E4EA] text-[13px]"
@@ -1884,7 +2575,6 @@ export default function YonetimClient() {
             </div>
           </div>
 
-          {/* Faaliyet Kapsamı Metni */}
           <div className="border-t border-[#E0E4EA] pt-5">
             <label
               htmlFor="const-scope"
@@ -1920,10 +2610,10 @@ export default function YonetimClient() {
       {/* EDIT VEHICLE MODAL */}
       {editingVehicle && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[12px] max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[12px] max-w-2xl w-full p-6 space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#E0E4EA] pb-3">
-              <h3 className="font-heading font-bold text-[18px] text-[#111F35]">
-                Araç İlanını Düzenle
+              <h3 className="font-heading font-bold text-[19px] text-[#111F35]">
+                Araç İlanını, Fotoğrafları ve Ekspertizi Düzenle
               </h3>
               <button
                 type="button"
@@ -1934,7 +2624,24 @@ export default function YonetimClient() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditVehicle} className="space-y-3">
+            <form onSubmit={handleSaveEditVehicle} className="space-y-4">
+              <PhotoGalleryEditor
+                images={editingVehicle.images}
+                onChange={(nextImages) =>
+                  setEditingVehicle({ ...editingVehicle, images: nextImages })
+                }
+                presets={[
+                  {
+                    label: "Galeri Görseli 1",
+                    url: "/assets/gapsan/gapsan-otomotiv-konsept.webp",
+                  },
+                  {
+                    label: "Galeri Görseli 2",
+                    url: "/assets/gapsan/gapsan-otomotiv-kart-konsept.webp",
+                  },
+                ]}
+              />
+
               <div>
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
                   Başlık
@@ -1943,29 +2650,35 @@ export default function YonetimClient() {
                   type="text"
                   value={editingVehicle.title}
                   onChange={(e) =>
-                    setEditingVehicle({ ...editingVehicle, title: e.target.value })
+                    setEditingVehicle({
+                      ...editingVehicle,
+                      title: e.target.value,
+                    })
                   }
                   required
                   className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
-                  <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
                     Fiyat
                   </label>
                   <input
                     type="text"
                     value={editingVehicle.price || ""}
                     onChange={(e) =>
-                      setEditingVehicle({ ...editingVehicle, price: e.target.value })
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        price: e.target.value,
+                      })
                     }
-                    className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px] font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
                     Kilometre
                   </label>
                   <input
@@ -1977,53 +2690,185 @@ export default function YonetimClient() {
                         km: e.target.value ? Number(e.target.value) : null,
                       })
                     }
-                    className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Paket / Donanım
+                  </label>
+                  <input
+                    type="text"
+                    value={editingVehicle.trim || ""}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        trim: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Renk
+                  </label>
+                  <input
+                    type="text"
+                    value={editingVehicle.color || ""}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        color: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  Ekspertiz / Hasar Kaydı
+                <label className="block text-[12px] font-bold text-[#111F35] mb-1">
+                  Detaylı İlan Açıklaması
                 </label>
-                <input
-                  type="text"
-                  value={editingVehicle.damageInfo || ""}
-                  onChange={(e) =>
-                    setEditingVehicle({ ...editingVehicle, damageInfo: e.target.value })
-                  }
-                  className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  Görsel URL
-                </label>
-                <input
-                  type="text"
-                  value={editingVehicle.images[0] || ""}
+                <textarea
+                  rows={3}
+                  value={editingVehicle.description || ""}
                   onChange={(e) =>
                     setEditingVehicle({
                       ...editingVehicle,
-                      images: [e.target.value],
+                      description: e.target.value,
                     })
                   }
-                  className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
+                  className="w-full p-2.5 rounded border border-[#E0E4EA] text-[13px]"
                 />
+              </div>
+
+              {/* Ekspertiz in Edit Modal */}
+              <div className="p-3.5 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-bold text-[#111F35]">
+                    Ekspertiz &amp; Hasar Raporu
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        damageInfo: "Hatasız • Boyasız • Değişensiz",
+                        tramerInfo: "Tramer Kaydı Yok (0 TL)",
+                        expertiseReport: { ...DEFAULT_EXPERTISE_REPORT },
+                      })
+                    }
+                    className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-700 text-white cursor-pointer"
+                  >
+                    ✓ Tümünü Orijinal Yap
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                      Ekspertiz Özeti
+                    </label>
+                    <input
+                      type="text"
+                      value={editingVehicle.damageInfo || ""}
+                      onChange={(e) =>
+                        setEditingVehicle({
+                          ...editingVehicle,
+                          damageInfo: e.target.value,
+                        })
+                      }
+                      className="w-full min-h-[36px] px-2.5 rounded border border-[#E0E4EA] bg-white text-[12px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                      Tramer Kaydı
+                    </label>
+                    <input
+                      type="text"
+                      value={editingVehicle.tramerInfo || ""}
+                      onChange={(e) =>
+                        setEditingVehicle({
+                          ...editingVehicle,
+                          tramerInfo: e.target.value,
+                        })
+                      }
+                      className="w-full min-h-[36px] px-2.5 rounded border border-[#E0E4EA] bg-white text-[12px]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {VEHICLE_PARTS.map((part) => {
+                    const rep =
+                      editingVehicle.expertiseReport ||
+                      DEFAULT_EXPERTISE_REPORT;
+                    const currentStatus = rep[part.key] || "Orijinal";
+                    return (
+                      <div
+                        key={part.key}
+                        className={`px-2 py-1 rounded border flex items-center justify-between gap-2 ${EXPERTISE_COLOR_MAP[currentStatus]}`}
+                      >
+                        <span className="text-[11px] font-semibold">
+                          {part.label}
+                        </span>
+                        <select
+                          value={currentStatus}
+                          onChange={(e) =>
+                            setEditingVehicle({
+                              ...editingVehicle,
+                              expertiseReport: {
+                                ...(editingVehicle.expertiseReport ||
+                                  DEFAULT_EXPERTISE_REPORT),
+                                [part.key]: e.target.value as ExpertiseStatus,
+                              },
+                            })
+                          }
+                          className="text-[11px] font-bold bg-white text-[#111F35] px-1 py-0.5 rounded border border-black/10"
+                        >
+                          {EXPERTISE_STATUSES.map((st) => (
+                            <option key={st} value={st}>
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Ekspertiz Notu
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={editingVehicle.expertiseNotes || ""}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        expertiseNotes: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 rounded border border-[#E0E4EA] bg-white text-[12px]"
+                  />
+                </div>
               </div>
 
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#E0E4EA]">
                 <button
                   type="button"
                   onClick={() => setEditingVehicle(null)}
-                  className="min-h-[40px] px-4 rounded border border-[#E0E4EA] text-[13px] font-semibold"
+                  className="min-h-[40px] px-4 rounded border border-[#E0E4EA] text-[13px] font-semibold cursor-pointer"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
-                  className="min-h-[40px] px-5 rounded bg-[#111F35] text-white text-[13px] font-semibold"
+                  className="min-h-[40px] px-5 rounded bg-[#111F35] text-white text-[13px] font-semibold cursor-pointer"
                 >
                   Güncellemeyi Kaydet
                 </button>
@@ -2036,10 +2881,10 @@ export default function YonetimClient() {
       {/* EDIT REAL ESTATE MODAL */}
       {editingRealEstate && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[12px] max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[12px] max-w-2xl w-full p-6 space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#E0E4EA] pb-3">
-              <h3 className="font-heading font-bold text-[18px] text-[#111F35]">
-                Taşınmaz İlanını Düzenle
+              <h3 className="font-heading font-bold text-[19px] text-[#111F35]">
+                Taşınmaz İlanını ve Fotoğrafları Düzenle
               </h3>
               <button
                 type="button"
@@ -2050,7 +2895,27 @@ export default function YonetimClient() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditRealEstate} className="space-y-3">
+            <form onSubmit={handleSaveEditRealEstate} className="space-y-4">
+              <PhotoGalleryEditor
+                images={editingRealEstate.images}
+                onChange={(nextImages) =>
+                  setEditingRealEstate({
+                    ...editingRealEstate,
+                    images: nextImages,
+                  })
+                }
+                presets={[
+                  {
+                    label: "Modern Konut",
+                    url: "/assets/gapsan/gapsan-gayrimenkul-konsept.webp",
+                  },
+                  {
+                    label: "Proje / Ticari",
+                    url: "/assets/gapsan/gapsan-og-gayrimenkul.webp",
+                  },
+                ]}
+              />
+
               <div>
                 <label className="block text-[12px] font-semibold text-[#182538] mb-1">
                   Başlık
@@ -2059,29 +2924,35 @@ export default function YonetimClient() {
                   type="text"
                   value={editingRealEstate.title}
                   onChange={(e) =>
-                    setEditingRealEstate({ ...editingRealEstate, title: e.target.value })
+                    setEditingRealEstate({
+                      ...editingRealEstate,
+                      title: e.target.value,
+                    })
                   }
                   required
                   className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
-                  <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
                     Fiyat
                   </label>
                   <input
                     type="text"
                     value={editingRealEstate.price || ""}
                     onChange={(e) =>
-                      setEditingRealEstate({ ...editingRealEstate, price: e.target.value })
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        price: e.target.value,
+                      })
                     }
-                    className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px] font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
                     m²
                   </label>
                   <input
@@ -2093,68 +2964,57 @@ export default function YonetimClient() {
                         areaM2: e.target.value ? Number(e.target.value) : null,
                       })
                     }
-                    className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
                     Oda Sayısı
                   </label>
                   <input
                     type="text"
                     value={editingRealEstate.rooms}
                     onChange={(e) =>
-                      setEditingRealEstate({ ...editingRealEstate, rooms: e.target.value })
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        rooms: e.target.value,
+                      })
                     }
-                    className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-semibold text-[#182538] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
                     İlçe
                   </label>
                   <input
                     type="text"
                     value={editingRealEstate.district}
                     onChange={(e) =>
-                      setEditingRealEstate({ ...editingRealEstate, district: e.target.value })
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        district: e.target.value,
+                      })
                     }
-                    className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  Açıklama
+                <label className="block text-[12px] font-bold text-[#111F35] mb-1">
+                  Detaylı Taşınmaz Açıklaması
                 </label>
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={editingRealEstate.description}
-                  onChange={(e) =>
-                    setEditingRealEstate({ ...editingRealEstate, description: e.target.value })
-                  }
-                  className="w-full p-2.5 rounded border border-[#E0E4EA] text-[13px]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[12px] font-semibold text-[#182538] mb-1">
-                  Görsel URL
-                </label>
-                <input
-                  type="text"
-                  value={editingRealEstate.images[0] || ""}
                   onChange={(e) =>
                     setEditingRealEstate({
                       ...editingRealEstate,
-                      images: [e.target.value],
+                      description: e.target.value,
                     })
                   }
-                  className="w-full min-h-[40px] px-3 rounded border border-[#E0E4EA] text-[13px]"
+                  className="w-full p-2.5 rounded border border-[#E0E4EA] text-[13px]"
                 />
               </div>
 
@@ -2162,13 +3022,13 @@ export default function YonetimClient() {
                 <button
                   type="button"
                   onClick={() => setEditingRealEstate(null)}
-                  className="min-h-[40px] px-4 rounded border border-[#E0E4EA] text-[13px] font-semibold"
+                  className="min-h-[40px] px-4 rounded border border-[#E0E4EA] text-[13px] font-semibold cursor-pointer"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
-                  className="min-h-[40px] px-5 rounded bg-[#111F35] text-white text-[13px] font-semibold"
+                  className="min-h-[40px] px-5 rounded bg-[#111F35] text-white text-[13px] font-semibold cursor-pointer"
                 >
                   Güncellemeyi Kaydet
                 </button>

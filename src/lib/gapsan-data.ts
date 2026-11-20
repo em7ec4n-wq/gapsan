@@ -2,6 +2,70 @@ export type PublishStatus = "Taslak" | "Onay bekliyor" | "Yayında" | "Arşiv";
 
 export type BusinessArea = "otomotiv" | "gayrimenkul" | "sigorta";
 
+export type ExpertiseStatus = "Orijinal" | "Lokal Boyalı" | "Boyalı" | "Değişen";
+
+export const VEHICLE_PARTS = [
+  { key: "kaput", label: "Motor Kaputu" },
+  { key: "tavan", label: "Tavan" },
+  { key: "bagaj", label: "Bagaj Kapağı" },
+  { key: "solOnCamurluk", label: "Sol Ön Çamurluk" },
+  { key: "solOnKapi", label: "Sol Ön Kapı" },
+  { key: "solArkaKapi", label: "Sol Arka Kapı" },
+  { key: "solArkaCamurluk", label: "Sol Arka Çamurluk" },
+  { key: "sagOnCamurluk", label: "Sağ Ön Çamurluk" },
+  { key: "sagOnKapi", label: "Sağ Ön Kapı" },
+  { key: "sagArkaKapi", label: "Sağ Arka Kapı" },
+  { key: "sagArkaCamurluk", label: "Sağ Arka Çamurluk" },
+  { key: "onTampon", label: "Ön Tampon" },
+  { key: "arkaTampon", label: "Arka Tampon" },
+] as const;
+
+export const DEFAULT_EXPERTISE_REPORT: Record<string, ExpertiseStatus> = {
+  kaput: "Orijinal",
+  tavan: "Orijinal",
+  bagaj: "Orijinal",
+  solOnCamurluk: "Orijinal",
+  solOnKapi: "Orijinal",
+  solArkaKapi: "Orijinal",
+  solArkaCamurluk: "Orijinal",
+  sagOnCamurluk: "Orijinal",
+  sagOnKapi: "Orijinal",
+  sagArkaKapi: "Orijinal",
+  sagArkaCamurluk: "Orijinal",
+  onTampon: "Orijinal",
+  arkaTampon: "Orijinal",
+};
+
+export const VEHICLE_FEATURES_LIST = [
+  "Senetli Satışa Uygun",
+  "Takasa Uygun",
+  "Ekspertiz Garantili",
+  "Sunroof / Cam Tavan",
+  "Geri Görüş Kamerası",
+  "Park Sensörü",
+  "Hız Sabitleyici",
+  "Deri / Yarı Deri Koltuk",
+  "CarPlay / Navigasyon",
+  "LED / Xenon Far",
+  "Çelik Jant",
+  "Koltuk Isıtma",
+  "Start / Stop",
+  "Katlanır Ayna",
+] as const;
+
+export const REAL_ESTATE_FEATURES_LIST = [
+  "Krediye Uygun",
+  "Takasa Uygun",
+  "Asansörlü",
+  "Kapalı Otopark",
+  "Açık Otopark",
+  "Güvenlik / Site İçi",
+  "Balkonlu / Teraslı",
+  "EBEVEYN Banyolu",
+  "Metro / Metrobüse Yakın",
+  "Cadde Üzeri / Merkezi",
+] as const;
+
 export interface VehicleListing {
   id: string;
   slug: string;
@@ -13,9 +77,14 @@ export interface VehicleListing {
   fuel: string;
   trim: string;
   horsepower: string;
+  color?: string;
   km: number | null;
   price: string | null;
   damageInfo: string | null;
+  tramerInfo?: string;
+  expertiseReport?: Record<string, ExpertiseStatus>;
+  expertiseNotes?: string;
+  features?: string[];
   stockInfo: string | null;
   description: string;
   images: string[];
@@ -38,6 +107,12 @@ export interface RealEstateListing {
   areaM2: number | null;
   price: string | null;
   rooms: string;
+  floor?: string;
+  buildingAge?: string;
+  heating?: string;
+  deedStatus?: string;
+  creditEligible?: boolean;
+  features?: string[];
   description: string;
   images: string[];
   status: PublishStatus;
@@ -392,9 +467,263 @@ export const DEMO_VEHICLE_LISTING: VehicleListing = {
   createdAt: "2026-11-18",
 };
 
-export const INITIAL_VEHICLE_LISTINGS: VehicleListing[] = [];
-export const INITIAL_REAL_ESTATE_LISTINGS: RealEstateListing[] = [];
-export const INITIAL_CONSTRUCTION_PROJECTS: ConstructionProject[] = [];
+export const INITIAL_VEHICLE_LISTINGS: VehicleListing[] = [
+  {
+    id: "veh-demo-passat-2021",
+    slug: "2021-volkswagen-passat-1-5-tsi-business-dsg",
+    title: "2021 Volkswagen Passat 1.5 TSI Business DSG",
+    brand: "Volkswagen",
+    model: "Passat",
+    year: 2021,
+    transmission: "Otomatik",
+    fuel: "Benzin",
+    trim: "1.5 TSI Business",
+    horsepower: "150 HP",
+    color: "Metalik Gri",
+    km: 64000,
+    price: "1.685.000 TL",
+    damageInfo: "Hatasız • Boyasız • Değişensiz",
+    tramerInfo: "Tramer Kaydı Yok (0 TL)",
+    expertiseReport: { ...DEFAULT_EXPERTISE_REPORT },
+    expertiseNotes:
+      "Aracımızın tüm kaporta aksamı orijinaldir. Motor, şanzıman ve yürüyen aksamı TSE belgeli kurumsal ekspertizden tam not almıştır. Yedek anahtarı ve kitapçıkları mevcuttur.",
+    features: [
+      "Senetli Satışa Uygun",
+      "Takasa Uygun",
+      "Ekspertiz Garantili",
+      "Geri Görüş Kamerası",
+      "Park Sensörü",
+      "Hız Sabitleyici",
+      "CarPlay / Navigasyon",
+      "LED / Xenon Far",
+      "Çelik Jant",
+      "Start / Stop",
+      "Katlanır Ayna",
+    ],
+    stockInfo: "Galeride Müsait",
+    description:
+      "GAPSAN Otomotiv Senetli Satış Merkezi güvencesiyle; 2021 model Volkswagen Passat 1.5 TSI Business DSG. Yetkili servis bakımlı, iç ve dış kozmetiği sıfır ayarındadır.\n\n%30 peşinatla banka kredisi veya %40 peşinatla kefilsiz, şartsız senetli taksit imkanıyla aynı gün noter devri yapılır. Mevcut aracınızla değerinde takas imkanı mevcuttur.",
+    images: [
+      "/assets/gapsan/gapsan-otomotiv-konsept.webp",
+      "/assets/gapsan/gapsan-otomotiv-kart-konsept.webp",
+    ],
+    status: "Yayında",
+    isAvailable: true,
+    isExample: true,
+    eidsVerified: true,
+    authorizationVerified: true,
+    sourceVerified: true,
+    createdAt: "2026-11-20",
+  },
+  {
+    id: "veh-demo-megane-2022",
+    slug: "2022-renault-megane-1-3-tce-icon-edc",
+    title: "2022 Renault Megane 1.3 TCe Icon EDC",
+    brand: "Renault",
+    model: "Megane",
+    year: 2022,
+    transmission: "Otomatik",
+    fuel: "Benzin",
+    trim: "1.3 TCe Icon",
+    horsepower: "140 HP",
+    color: "İnci Beyaz",
+    km: 52000,
+    price: "1.245.000 TL",
+    damageInfo: "Değişensiz • 1 Parça Lokal Boya",
+    tramerInfo: "Tramer Kaydı Yok (0 TL)",
+    expertiseReport: {
+      ...DEFAULT_EXPERTISE_REPORT,
+      sagArkaCamurluk: "Lokal Boyalı",
+    },
+    expertiseNotes:
+      "Sağ arka çamurlukta çizik kaynaklı el kadar lokal boya mevcuttur. Harici hatasız, boyasız ve değişensizdir. Şase, podye, direkler ve airbagler tamamen orijinaldir.",
+    features: [
+      "Senetli Satışa Uygun",
+      "Takasa Uygun",
+      "Ekspertiz Garantili",
+      "Geri Görüş Kamerası",
+      "Park Sensörü",
+      "Hız Sabitleyici",
+      "Deri / Yarı Deri Koltuk",
+      "CarPlay / Navigasyon",
+      "LED / Xenon Far",
+      "Çelik Jant",
+      "Start / Stop",
+      "Katlanır Ayna",
+    ],
+    stockInfo: "Galeride Müsait",
+    description:
+      "En dolu paket olan Icon donanım. Hayalet ekran, büyük multimedya, yarı deri koltuklar, anahtarsız giriş ve çalıştırma mevcuttur.\n\nSenetli satışta ödemeye 3 ay sonra başlama avantajı ve erken kapamada faiz/vade farkı silinme garantisiyle GAPSAN Otomotiv'de.",
+    images: [
+      "/assets/gapsan/gapsan-otomotiv-kart-konsept.webp",
+      "/assets/gapsan/gapsan-otomotiv-konsept.webp",
+    ],
+    status: "Yayında",
+    isAvailable: true,
+    isExample: true,
+    eidsVerified: true,
+    authorizationVerified: true,
+    sourceVerified: true,
+    createdAt: "2026-11-20",
+  },
+];
+
+export const INITIAL_REAL_ESTATE_LISTINGS: RealEstateListing[] = [
+  {
+    id: "re-demo-satilik-3plus1",
+    slug: "esenyurt-ucevler-torium-yakini-satilik-3-1-luks-daire",
+    title: "Esenyurt Üçevler Torium Yakını Satılık 3+1 Lüks Daire",
+    listingType: "Satılık",
+    propertyType: "Daire",
+    district: "Esenyurt",
+    areaM2: 135,
+    price: "3.650.000 TL",
+    rooms: "3+1",
+    floor: "3. Kat (Ara Kat)",
+    buildingAge: "0 (Sıfır Bina)",
+    heating: "Kombi (Doğalgaz)",
+    deedStatus: "Kat Mülkiyetli (İskanlı)",
+    creditEligible: true,
+    features: [
+      "Krediye Uygun",
+      "Takasa Uygun",
+      "Asansörlü",
+      "Kapalı Otopark",
+      "Balkonlu / Teraslı",
+      "EBEVEYN Banyolu",
+      "Metro / Metrobüse Yakın",
+      "Cadde Üzeri / Merkezi",
+    ],
+    description:
+      "GAPSAN İnşaat & Gayrimenkul güvencesiyle; Esenyurt Üçevler Mahallesi'nde, Torium AVM ve E-5 / Metrobüs hattına yürüme mesafesinde sıfır 3+1 geniş aile dairesi.\n\nİskanı alınmış, kat mülkiyetli tapusu hazır ve konut kredisine tam uygundur. Araç veya gayrimenkul takası değerlendirilir.",
+    images: [
+      "/assets/gapsan/gapsan-gayrimenkul-konsept.webp",
+      "/assets/gapsan/gapsan-og-gayrimenkul.webp",
+    ],
+    status: "Yayında",
+    isAvailable: true,
+    isExample: true,
+    eidsVerified: true,
+    authorizationVerified: true,
+    sourceVerified: true,
+    createdAt: "2026-11-20",
+  },
+  {
+    id: "re-demo-satilik-isyeri",
+    slug: "esenyurt-pazaryolu-caddesi-satilik-kurumsal-kose-dukkan",
+    title: "Esenyurt Pazaryolu Caddesi Satılık Yüksek Kira Getirili Köşe Dükkan",
+    listingType: "Satılık",
+    propertyType: "İş Yeri",
+    district: "Esenyurt",
+    areaM2: 180,
+    price: "7.850.000 TL",
+    rooms: "Düz Giriş + Asma Kat",
+    floor: "Zemin / Cadde Giriş",
+    buildingAge: "2",
+    heating: "Klima / Doğalgaz",
+    deedStatus: "Kat Mülkiyetli",
+    creditEligible: true,
+    features: [
+      "Krediye Uygun",
+      "Takasa Uygun",
+      "Açık Otopark",
+      "Metro / Metrobüse Yakın",
+      "Cadde Üzeri / Merkezi",
+    ],
+    description:
+      "Yaya ve araç trafiğinin en yoğun olduğu Pazaryolu Caddesi aksında, geniş vitrin cepheli, kurumsal kiracıya uygun 180 m² satılık ticari mağaza / dükkan.\n\nDeğerinde araç takası ve esnek ödeme kolaylığı ile GAPSAN İnşaat & Gayrimenkul portföyündedir.",
+    images: [
+      "/assets/gapsan/gapsan-og-gayrimenkul.webp",
+      "/assets/gapsan/gapsan-gayrimenkul-konsept.webp",
+    ],
+    status: "Yayında",
+    isAvailable: true,
+    isExample: true,
+    eidsVerified: true,
+    authorizationVerified: true,
+    sourceVerified: true,
+    createdAt: "2026-11-20",
+  },
+  {
+    id: "re-demo-kiralik-2plus1",
+    slug: "esenyurt-merkez-metrobus-yakini-kiralik-2-1-arakat-daire",
+    title: "Esenyurt Merkez Metrobüs Yakını Yeni Binada Kiralık 2+1 Daire",
+    listingType: "Kiralık",
+    propertyType: "Daire",
+    district: "Esenyurt",
+    areaM2: 105,
+    price: "22.000 TL / Ay",
+    rooms: "2+1",
+    floor: "4. Kat",
+    buildingAge: "3",
+    heating: "Kombi (Doğalgaz)",
+    deedStatus: "Kat Mülkiyetli",
+    creditEligible: false,
+    features: [
+      "Asansörlü",
+      "Kapalı Otopark",
+      "Güvenlik / Site İçi",
+      "Balkonlu / Teraslı",
+      "Metro / Metrobüse Yakın",
+    ],
+    description:
+      "Esenyurt merkezde, ulaşım araçlarına, okullara ve alışveriş merkezlerine yürüme mesafesinde, asansörlü ve kapalı otoparklı yeni binada ferah 2+1 kiralık daire.\n\nDairemiz boyalı, bakımlı ve hemen taşınmaya hazırdır.",
+    images: ["/assets/gapsan/gapsan-gayrimenkul-konsept.webp"],
+    status: "Yayında",
+    isAvailable: true,
+    isExample: true,
+    eidsVerified: true,
+    authorizationVerified: true,
+    sourceVerified: true,
+    createdAt: "2026-11-20",
+  },
+  {
+    id: "re-demo-kiralik-isyeri",
+    slug: "esenyurt-ucevler-caddede-kiralik-kurumsal-magaza-ofis",
+    title: "Esenyurt Üçevler Ana Cadde Üzeri Kiralık Mağaza & Kurumsal Ofis",
+    listingType: "Kiralık",
+    propertyType: "İş Yeri",
+    district: "Esenyurt",
+    areaM2: 140,
+    price: "48.000 TL / Ay",
+    rooms: "3 Bölüm + WC/Mutfak",
+    floor: "Zemin Giriş",
+    buildingAge: "4",
+    heating: "Kombi / Klima",
+    deedStatus: "Kat Mülkiyetli",
+    creditEligible: false,
+    features: [
+      "Açık Otopark",
+      "Metro / Metrobüse Yakın",
+      "Cadde Üzeri / Merkezi",
+    ],
+    description:
+      "Üçevler Mahallesi ana cadde cepheli, tabela değeri yüksek, her türlü kurumsal mağaza, klinik, acente veya showroom kullanımına uygun 140 m² kiralık iş yeri.",
+    images: ["/assets/gapsan/gapsan-og-gayrimenkul.webp"],
+    status: "Yayında",
+    isAvailable: true,
+    isExample: true,
+    eidsVerified: true,
+    authorizationVerified: true,
+    sourceVerified: true,
+    createdAt: "2026-11-20",
+  },
+];
+
+export const INITIAL_CONSTRUCTION_PROJECTS: ConstructionProject[] = [
+  {
+    id: "proj-demo-ucevler",
+    slug: "gapsan-ucevler-konut-ve-ticari-yasam-projesi",
+    title: "GAPSAN Üçevler Konut & Ticari Yaşam Projesi",
+    district: "Esenyurt / İstanbul",
+    scope: "Modern Konut & Cadde Mağaza Geliştirme",
+    summary:
+      "Deprem yönetmeliğine tam uyumlu, C35 beton ve radye temel sistemiyle inşa edilen; kapalı otoparklı, asansörlü 2+1 ve 3+1 aile daireleri ile zemin kat ticari mağazalardan oluşan prestijli yaşam projesi.",
+    images: ["/assets/gapsan/gapsan-gayrimenkul-konsept.webp"],
+    status: "Yayında",
+  },
+];
+
 export const INITIAL_REVIEWS: CustomerReview[] = [];
 
 export const APPROVED_INSURANCE_TYPES = [

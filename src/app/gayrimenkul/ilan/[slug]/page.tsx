@@ -2,6 +2,8 @@ import React from "react";
 import type { Metadata } from "next";
 import RealEstateDetailClient from "@/components/RealEstateDetailClient";
 
+export const dynamicParams = true;
+
 export function generateStaticParams() {
   return [{ slug: "ornek-ilan" }];
 }

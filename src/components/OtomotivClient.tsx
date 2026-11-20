@@ -674,26 +674,43 @@ export default function OtomotivClient() {
                 {filteredPublished.map((car) => (
                   <article
                     key={car.id}
-                    className="bg-white border border-[#E0E4EA] rounded-[10px] overflow-hidden flex flex-col justify-between"
+                    className="bg-white border border-[#E0E4EA] hover:border-[#D6A948] transition-colors rounded-[10px] overflow-hidden flex flex-col justify-between"
                   >
                     <div>
-                      <div className="aspect-[4/3] bg-[#111F35] overflow-hidden">
+                      <Link
+                        href={`/otomotiv/ilan/${car.slug}`}
+                        className="block relative aspect-[4/3] bg-[#111F35] overflow-hidden"
+                      >
                         <img
                           src={
                             car.images[0] ||
                             "/assets/gapsan/gapsan-ilan-siluet.png"
                           }
                           alt={car.title}
-                          className="w-full h-full object-cover object-center"
+                          className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300"
                         />
-                      </div>
+                        {car.damageInfo && (
+                          <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded bg-[#111F35]/90 text-[#D6A948] text-[11px] font-bold">
+                            {car.damageInfo}
+                          </span>
+                        )}
+                        {car.images.length > 1 && (
+                          <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-white text-[11px] font-semibold">
+                            {car.images.length} Fotoğraf
+                          </span>
+                        )}
+                      </Link>
                       <div className="p-5 space-y-2">
-                        <h4 className="font-heading font-bold text-[18px] text-[#111F35]">
+                        <Link
+                          href={`/otomotiv/ilan/${car.slug}`}
+                          className="font-heading font-bold text-[18px] text-[#111F35] hover:text-[#D6A948] block"
+                        >
                           {car.title}
-                        </h4>
+                        </Link>
                         <p className="text-[14px] text-[#536174]">
                           {[
                             car.year,
+                            car.fuel,
                             car.transmission,
                             car.km !== null
                               ? `${car.km.toLocaleString("tr-TR")} km`
@@ -703,7 +720,7 @@ export default function OtomotivClient() {
                             .join(" • ")}
                         </p>
                         {car.price && (
-                          <p className="font-heading font-bold text-[17px] text-[#111F35]">
+                          <p className="font-heading font-extrabold text-[18px] text-[#111F35]">
                             {car.price}
                           </p>
                         )}
@@ -712,13 +729,13 @@ export default function OtomotivClient() {
                     <div className="px-5 pb-5 flex flex-col gap-2">
                       <Link
                         href={`/otomotiv/ilan/${car.slug}`}
-                        className="w-full min-h-[44px] inline-flex items-center justify-center rounded-[10px] bg-[#111F35] text-white font-semibold text-[14px]"
+                        className="w-full min-h-[44px] inline-flex items-center justify-center rounded-[10px] bg-[#111F35] hover:bg-[#1b2e4b] text-white font-semibold text-[14px] transition-colors"
                       >
-                        İlanı İncele
+                        İlanı &amp; Ekspertizi İncele
                       </Link>
                       <Link
                         href={`/?alan=otomotiv&ilan=${car.slug}#talep`}
-                        className="w-full min-h-[44px] inline-flex items-center justify-center rounded-[10px] bg-[#D6A948] text-[#111F35] font-semibold text-[14px]"
+                        className="w-full min-h-[44px] inline-flex items-center justify-center rounded-[10px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-semibold text-[14px] transition-colors"
                       >
                         Bu İlanla Talep Oluştur
                       </Link>

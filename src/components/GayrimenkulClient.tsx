@@ -15,8 +15,16 @@ import { useGapsanStore } from "@/lib/gapsan-store";
 import CertificatesGrid from "./CertificatesGrid";
 
 export default function GayrimenkulClient() {
-  const { contact, constructionApprovedScope, projects } = useGapsanStore();
+  const { contact, constructionApprovedScope, projects, realEstates } =
+    useGapsanStore();
+  const [filterType, setFilterType] = React.useState<"Tümü" | "Satılık" | "Kiralık">("Tümü");
   const approvedProjects = projects.filter((p) => p.status === "Yayında");
+  const publishedRealEstates = realEstates.filter(
+    (r) =>
+      r.status === "Yayında" &&
+      r.isAvailable &&
+      (filterType === "Tümü" || r.listingType === filterType)
+  );
 
   return (
     <div>
@@ -167,6 +175,106 @@ export default function GayrimenkulClient() {
             </div>
             <ChevronRight className="w-5 h-5 text-[#D6A948] shrink-0 mt-1 group-hover:translate-x-1 transition-transform" />
           </Link>
+        </div>
+
+        {/* Yayındaki Gayrimenkul İlanları */}
+        <div className="mt-8 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-heading font-bold text-[20px] text-[#111F35]">
+              Yayındaki Satılık ve Kiralık İlanlar ({publishedRealEstates.length})
+            </h3>
+            <div className="flex items-center gap-2">
+              {(["Tümü", "Satılık", "Kiralık"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setFilterType(tab)}
+                  className={`px-3.5 py-1.5 rounded-[8px] text-[13px] font-semibold border cursor-pointer transition-colors ${
+                    filterType === tab
+                      ? "bg-[#111F35] text-white border-[#111F35]"
+                      : "bg-white text-[#182538] border-[#E0E4EA] hover:bg-[#F7F5EF]"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {publishedRealEstates.length === 0 ? (
+            <div className="bg-white border border-[#E0E4EA] rounded-[10px] p-6 text-center text-[#536174] text-[14px]">
+              Bu kategoride henüz yayında taşınmaz ilanı bulunmuyor.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              {publishedRealEstates.map((item) => (
+                <article
+                  key={item.id}
+                  className="bg-white border border-[#E0E4EA] hover:border-[#D6A948] transition-colors rounded-[10px] overflow-hidden flex flex-col justify-between"
+                >
+                  <div>
+                    <Link
+                      href={`/gayrimenkul/ilan/${item.slug}`}
+                      className="block relative aspect-[4/3] bg-[#111F35] overflow-hidden"
+                    >
+                      <img
+                        src={
+                          item.images[0] ||
+                          "/assets/gapsan/gapsan-gayrimenkul-konsept.webp"
+                        }
+                        alt={item.title}
+                        className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300"
+                      />
+                      <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded bg-[#111F35]/90 text-[#D6A948] text-[11px] font-bold">
+                        {item.listingType} &bull; {item.propertyType}
+                      </span>
+                      {item.images.length > 1 && (
+                        <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-white text-[11px] font-semibold">
+                          {item.images.length} Fotoğraf
+                        </span>
+                      )}
+                    </Link>
+                    <div className="p-4 space-y-2">
+                      <Link
+                        href={`/gayrimenkul/ilan/${item.slug}`}
+                        className="font-heading font-bold text-[16px] text-[#111F35] hover:text-[#D6A948] line-clamp-2 block"
+                      >
+                        {item.title}
+                      </Link>
+                      <p className="text-[13px] text-[#536174]">
+                        {[
+                          item.district,
+                          item.areaM2 ? `${item.areaM2} m²` : null,
+                          item.rooms || null,
+                        ]
+                          .filter(Boolean)
+                          .join(" • ")}
+                      </p>
+                      {item.price && (
+                        <p className="font-heading font-extrabold text-[17px] text-[#111F35]">
+                          {item.price}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4 flex flex-col gap-2">
+                    <Link
+                      href={`/gayrimenkul/ilan/${item.slug}`}
+                      className="w-full min-h-[40px] inline-flex items-center justify-center rounded-[8px] bg-[#111F35] hover:bg-[#1b2e4b] text-white font-semibold text-[13px] transition-colors"
+                    >
+                      İlanı İncele
+                    </Link>
+                    <Link
+                      href={`/?alan=gayrimenkul&ilan=${item.slug}#talep`}
+                      className="w-full min-h-[40px] inline-flex items-center justify-center rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-semibold text-[13px] transition-colors"
+                    >
+                      Talep Oluştur
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
