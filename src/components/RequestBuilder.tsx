@@ -427,7 +427,7 @@ export default function RequestBuilder({
                   }`}
                 >
                   <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" aria-hidden="true" />
-                  <span>Gayrimenkul</span>
+                  <span>İnşaat</span>
                 </button>
                 <button
                   type="button"

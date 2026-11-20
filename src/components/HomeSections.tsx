@@ -29,10 +29,10 @@ export function ActivityAreasSection() {
       mobileFocus: "50% 56%",
     },
     {
-      title: "Gayrimenkul",
-      href: "/gayrimenkul",
+      title: "İnşaat",
+      href: "/insaat",
       image: "/assets/gapsan/gapsan-gayrimenkul-konsept.webp",
-      alt: "Gapşan Gayrimenkul apartman cephesi konsept görseli",
+      alt: "Gapşan İnşaat & Gayrimenkul konsept görseli",
       mobileFocus: "68% 62%",
     },
     {
@@ -600,7 +600,7 @@ export function ReachGapsanSection() {
                 href={contact.units.gayrimenkul.phoneTel}
                 className="inline-flex items-center gap-1.5 hover:text-[#D6A948]"
               >
-                Gayrimenkul: {contact.units.gayrimenkul.phoneDisplay}
+                İnşaat: {contact.units.gayrimenkul.phoneDisplay}
               </a>
               <a
                 href={contact.units.sigorta.phoneTel}

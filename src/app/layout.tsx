@@ -24,11 +24,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "GAPSAN Şirketler Grubu | Otomotiv, Gayrimenkul ve Sigorta",
+    default: "GAPSAN Şirketler Grubu | Otomotiv, İnşaat ve Sigorta",
     template: "%s | GAPSAN Şirketler Grubu",
   },
   description:
-    "Esenyurt, İstanbul merkezli GAPSAN Şirketler Grubu; otomotiv alım-satım ve takas, satılık-kiralık gayrimenkul ve sigorta taleplerinizde yanınızda.",
+    "Esenyurt, İstanbul merkezli GAPSAN Şirketler Grubu; otomotiv alım-satım ve takas, inşaat & gayrimenkul ve sigorta taleplerinizde yanınızda.",
   icons: {
     icon: "/assets/gapsan/gapsan-favicon.png",
     apple: "/assets/gapsan/gapsan-favicon.png",
@@ -40,9 +40,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "tr_TR",
     siteName: "GAPSAN Şirketler Grubu",
-    title: "GAPSAN Şirketler Grubu | Otomotiv, Gayrimenkul ve Sigorta",
+    title: "GAPSAN Şirketler Grubu | Otomotiv, İnşaat ve Sigorta",
     description:
-      "Otomotiv, gayrimenkul ve sigorta alanlarında Esenyurt, İstanbul merkezli kurumsal hizmet.",
+      "Otomotiv, inşaat ve sigorta alanlarında Esenyurt, İstanbul merkezli kurumsal hizmet.",
     images: [
       {
         url: "/assets/gapsan/gapsan-og-genel.webp",

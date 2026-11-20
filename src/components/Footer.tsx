@@ -45,8 +45,8 @@ export default function Footer() {
             <span className="text-[#E0E4EA] hidden sm:inline" aria-hidden="true">
               |
             </span>
-            <Link href="/gayrimenkul" className="hover:text-[#111F35] py-1">
-              Gayrimenkul
+            <Link href="/insaat" className="hover:text-[#111F35] py-1">
+              İnşaat
             </Link>
             <span className="text-[#E0E4EA] hidden sm:inline" aria-hidden="true">
               |
@@ -106,7 +106,7 @@ export default function Footer() {
 
             <div className="flex items-center gap-2">
               <span className="text-[12px] font-bold text-[#111F35] uppercase">
-                Gayrimenkul:
+                İnşaat:
               </span>
               <a
                 href={contact.socialMedia.instagramGayrimenkul}

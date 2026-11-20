@@ -95,7 +95,7 @@ export default function IletisimPage() {
                     </a>
                   </p>
                   <p className="text-[#536174]">
-                    <span className="font-semibold text-[#111F35] block text-[12px] uppercase">Gayrimenkul Birimi:</span>
+                    <span className="font-semibold text-[#111F35] block text-[12px] uppercase">İnşaat Birimi:</span>
                     <a
                       href={`mailto:${CONTACT_CONFIG.gayrimenkulEmail}`}
                       className="font-bold text-[#111F35] hover:underline"
@@ -302,7 +302,7 @@ export default function IletisimPage() {
               <div className="p-4 rounded-[10px] bg-[#F7F5EF] border border-[#E0E4EA] hover:border-[#D6A948] transition-colors flex flex-col justify-between">
                 <div>
                   <p className="text-[12px] font-semibold text-[#536174]">
-                    Gayrimenkul Birimi
+                    İnşaat &amp; Gayrimenkul
                   </p>
                   <a
                     href={CONTACT_CONFIG.units.gayrimenkul.phoneTel}

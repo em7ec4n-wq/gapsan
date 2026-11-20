@@ -8,7 +8,7 @@ import { useGapsanStore } from "@/lib/gapsan-store";
 
 const NAV_LINKS = [
   { href: "/otomotiv", label: "Otomotiv" },
-  { href: "/gayrimenkul", label: "Gayrimenkul" },
+  { href: "/insaat", label: "İnşaat" },
   { href: "/sigorta", label: "Sigorta" },
   { href: "/kurumsal", label: "Kurumsal" },
   { href: "/iletisim", label: "İletişim" },
@@ -56,6 +56,7 @@ export default function Header() {
           {NAV_LINKS.map((item) => {
             const active =
               pathname === item.href ||
+              (item.href === "/insaat" && (pathname === "/gayrimenkul" || pathname.startsWith("/gayrimenkul/"))) ||
               (item.href !== "/" && pathname.startsWith(item.href + "/"));
             return (
               <Link
@@ -132,7 +133,9 @@ export default function Header() {
 
               <nav className="mt-4 flex flex-col gap-1" aria-label="Mobil menü">
                 {NAV_LINKS.map((item) => {
-                  const active = pathname === item.href;
+                  const active =
+                    pathname === item.href ||
+                    (item.href === "/insaat" && (pathname === "/gayrimenkul" || pathname.startsWith("/gayrimenkul/")));
                   return (
                     <Link
                       key={item.href}
