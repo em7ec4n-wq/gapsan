@@ -48,6 +48,7 @@ const EXPERTISE_STATUSES: ExpertiseStatus[] = [
   "Lokal Boyalı",
   "Boyalı",
   "Değişen",
+  "İşlemli",
 ];
 
 const EXPERTISE_COLOR_MAP: Record<ExpertiseStatus, string> = {
@@ -55,6 +56,7 @@ const EXPERTISE_COLOR_MAP: Record<ExpertiseStatus, string> = {
   "Lokal Boyalı": "bg-amber-50 text-amber-800 border-amber-300",
   Boyalı: "bg-orange-50 text-orange-800 border-orange-300",
   Değişen: "bg-red-50 text-red-800 border-red-300",
+  İşlemli: "bg-purple-50 text-purple-800 border-purple-300",
 };
 
 /** Client-side image compressor so multiple phone photos upload fast & crisp */
@@ -938,17 +940,33 @@ export default function YonetimClient() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Add Vehicle Form */}
           <form
+            id="vehicle-add-form"
             onSubmit={handleAddVehicle}
             className="lg:col-span-6 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-4 shadow-xs"
           >
-            <div className="flex items-center justify-between border-b border-[#E0E4EA] pb-3">
-              <h2 className="font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#D6A948]" />
-                Yeni Araç İlanı Ekle (Fotoğraflı &amp; Ekspertizli)
-              </h2>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                {role === "Yayıncı" ? "Doğrudan Yayında" : "Taslak"}
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E0E4EA] pb-3.5 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/40 -mx-5 -mt-5 p-5 rounded-t-[10px]">
+              <div>
+                <h2 className="font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-[#D6A948]" />
+                  Yeni Araç İlanı Ekle (Fotoğraflı &amp; Ekspertizli)
+                </h2>
+                <p className="text-[12px] text-[#536174] mt-0.5">
+                  Fotoğrafları ve bilgileri girin; hem üstten hem en alttan anında yayınlayabilirsiniz.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  {role === "Yayıncı" ? "✓ Doğrudan Yayında" : "Taslak"}
+                </span>
+                <button
+                  type="submit"
+                  className="min-h-[42px] px-5 rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-black text-[14px] shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-[#111F35]" />
+                  <span>{role === "Yayıncı" ? "🚀 İlanı Şimdi Yayınla" : "💾 Taslak Kaydet"}</span>
+                </button>
+              </div>
             </div>
 
             {/* 1. Fotoğraf Yükleme Bölümü */}
@@ -1181,13 +1199,59 @@ export default function YonetimClient() {
                 </div>
               </div>
 
-              {/* 13 Parça Seçici */}
+              {/* Şase & Airbag / Kritik Güvenlik Parçaları (5 Parça) */}
+              <div className="p-3.5 rounded-[8px] bg-slate-50 border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-bold text-[#111F35] flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-[#D6A948]" />
+                    <span>Şase, Podye &amp; Airbag Durumu (5 Kritik Güvenlik Parçası)</span>
+                  </span>
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    Kritik Güvenlik
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {VEHICLE_PARTS.filter((p) => p.category === "sase_guvenlik").map((part) => {
+                    const currentStatus =
+                      vExpertiseReport[part.key] || "Orijinal";
+                    return (
+                      <div
+                        key={part.key}
+                        className={`px-2.5 py-1.5 rounded-[6px] border flex items-center justify-between gap-2 ${EXPERTISE_COLOR_MAP[currentStatus]}`}
+                      >
+                        <span className="text-[12px] font-bold truncate">
+                          {part.label}
+                        </span>
+                        <select
+                          value={currentStatus}
+                          onChange={(e) =>
+                            setVExpertiseReport((prev) => ({
+                              ...prev,
+                              [part.key]: e.target.value as ExpertiseStatus,
+                            }))
+                          }
+                          className="text-[11px] font-extrabold bg-white text-[#111F35] px-2 py-0.5 rounded border border-black/15 cursor-pointer shadow-xs"
+                        >
+                          {EXPERTISE_STATUSES.map((st) => (
+                            <option key={st} value={st}>
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Kaporta & Dış Gövde Parçaları (13 Parça) */}
               <div>
-                <p className="text-[11px] font-semibold text-[#536174] mb-2">
-                  Parça Bazlı Ekspertiz Durumu (Parçanın durumunu seçin):
+                <p className="text-[11px] font-bold text-[#182538] mb-1.5">
+                  Kaporta &amp; Dış Parçalar (13 Parça):
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {VEHICLE_PARTS.map((part) => {
+                  {VEHICLE_PARTS.filter((p) => p.category === "kaporta").map((part) => {
                     const currentStatus =
                       vExpertiseReport[part.key] || "Orijinal";
                     return (
@@ -1296,11 +1360,12 @@ export default function YonetimClient() {
 
             <button
               type="submit"
-              className="w-full min-h-[46px] rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-extrabold text-[15px] cursor-pointer transition-colors"
+              className="w-full min-h-[52px] rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-extrabold text-[16px] cursor-pointer transition-colors shadow-sm flex items-center justify-center gap-2"
             >
+              <CheckCircle2 className="w-5 h-5 text-[#111F35]" />
               {role === "Yayıncı"
-                ? "Araç İlanını Şimdi Yayınla"
-                : "İlanı Taslak Olarak Kaydet"}
+                ? "🚀 Araç İlanını Şimdi Yayınla"
+                : "💾 İlanı Taslak Olarak Kaydet"}
             </button>
           </form>
 
@@ -1476,17 +1541,33 @@ export default function YonetimClient() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Add Real Estate Form */}
           <form
+            id="realestate-add-form"
             onSubmit={handleAddRealEstate}
             className="lg:col-span-6 bg-white border border-[#E0E4EA] rounded-[10px] p-5 space-y-4 shadow-xs"
           >
-            <div className="flex items-center justify-between border-b border-[#E0E4EA] pb-3">
-              <h2 className="font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#D6A948]" />
-                Yeni İnşaat &amp; Gayrimenkul İlanı Ekle
-              </h2>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                {role === "Yayıncı" ? "Doğrudan Yayında" : "Taslak"}
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E0E4EA] pb-3.5 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/40 -mx-5 -mt-5 p-5 rounded-t-[10px]">
+              <div>
+                <h2 className="font-heading font-bold text-[18px] text-[#111F35] flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-[#D6A948]" />
+                  Yeni İnşaat &amp; Gayrimenkul İlanı Ekle
+                </h2>
+                <p className="text-[12px] text-[#536174] mt-0.5">
+                  Fotoğrafları ve bilgileri girin; hem üstten hem en alttan anında yayınlayabilirsiniz.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  {role === "Yayıncı" ? "✓ Doğrudan Yayında" : "Taslak"}
+                </span>
+                <button
+                  type="submit"
+                  className="min-h-[42px] px-5 rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-black text-[14px] shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-[#111F35]" />
+                  <span>{role === "Yayıncı" ? "🚀 İlanı Şimdi Yayınla" : "💾 Taslak Kaydet"}</span>
+                </button>
+              </div>
             </div>
 
             {/* 1. Çoklu Fotoğraf Yükleme */}
@@ -1731,11 +1812,12 @@ export default function YonetimClient() {
 
             <button
               type="submit"
-              className="w-full min-h-[46px] rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-extrabold text-[15px] cursor-pointer transition-colors"
+              className="w-full min-h-[52px] rounded-[8px] bg-[#D6A948] hover:bg-[#c59836] text-[#111F35] font-extrabold text-[16px] cursor-pointer transition-colors shadow-sm flex items-center justify-center gap-2"
             >
+              <CheckCircle2 className="w-5 h-5 text-[#111F35]" />
               {role === "Yayıncı"
-                ? "Taşınmaz İlanını Şimdi Yayınla"
-                : "İlanı Taslak Olarak Kaydet"}
+                ? "🚀 Taşınmaz İlanını Şimdi Yayınla"
+                : "💾 İlanı Taslak Olarak Kaydet"}
             </button>
           </form>
 
@@ -2801,43 +2883,95 @@ export default function YonetimClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                  {VEHICLE_PARTS.map((part) => {
-                    const rep =
-                      editingVehicle.expertiseReport ||
-                      DEFAULT_EXPERTISE_REPORT;
-                    const currentStatus = rep[part.key] || "Orijinal";
-                    return (
-                      <div
-                        key={part.key}
-                        className={`px-2 py-1 rounded border flex items-center justify-between gap-2 ${EXPERTISE_COLOR_MAP[currentStatus]}`}
-                      >
-                        <span className="text-[11px] font-semibold">
-                          {part.label}
-                        </span>
-                        <select
-                          value={currentStatus}
-                          onChange={(e) =>
-                            setEditingVehicle({
-                              ...editingVehicle,
-                              expertiseReport: {
-                                ...(editingVehicle.expertiseReport ||
-                                  DEFAULT_EXPERTISE_REPORT),
-                                [part.key]: e.target.value as ExpertiseStatus,
-                              },
-                            })
-                          }
-                          className="text-[11px] font-bold bg-white text-[#111F35] px-1 py-0.5 rounded border border-black/10"
-                        >
-                          {EXPERTISE_STATUSES.map((st) => (
-                            <option key={st} value={st}>
-                              {st}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    );
-                  })}
+                <div className="space-y-3">
+                  {/* Şase & Airbag */}
+                  <div className="p-2.5 rounded bg-slate-50 border border-slate-200 space-y-1.5">
+                    <p className="text-[11px] font-bold text-[#111F35] flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#D6A948]" />
+                      Şase, Podye &amp; Airbag (Kritik Güvenlik):
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {VEHICLE_PARTS.filter((p) => p.category === "sase_guvenlik").map((part) => {
+                        const rep =
+                          editingVehicle.expertiseReport ||
+                          DEFAULT_EXPERTISE_REPORT;
+                        const currentStatus = rep[part.key] || "Orijinal";
+                        return (
+                          <div
+                            key={part.key}
+                            className={`px-2 py-1.5 rounded border flex items-center justify-between gap-2 ${EXPERTISE_COLOR_MAP[currentStatus]}`}
+                          >
+                            <span className="text-[11px] font-bold">
+                              {part.label}
+                            </span>
+                            <select
+                              value={currentStatus}
+                              onChange={(e) =>
+                                setEditingVehicle({
+                                  ...editingVehicle,
+                                  expertiseReport: {
+                                    ...(editingVehicle.expertiseReport ||
+                                      DEFAULT_EXPERTISE_REPORT),
+                                    [part.key]: e.target.value as ExpertiseStatus,
+                                  },
+                                })
+                              }
+                              className="text-[11px] font-extrabold bg-white text-[#111F35] px-1 py-0.5 rounded border border-black/10"
+                            >
+                              {EXPERTISE_STATUSES.map((st) => (
+                                <option key={st} value={st}>
+                                  {st}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Kaporta */}
+                  <div>
+                    <p className="text-[11px] font-semibold text-[#536174] mb-1.5">Kaporta &amp; Dış Parçalar:</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {VEHICLE_PARTS.filter((p) => p.category === "kaporta").map((part) => {
+                        const rep =
+                          editingVehicle.expertiseReport ||
+                          DEFAULT_EXPERTISE_REPORT;
+                        const currentStatus = rep[part.key] || "Orijinal";
+                        return (
+                          <div
+                            key={part.key}
+                            className={`px-2 py-1 rounded border flex items-center justify-between gap-2 ${EXPERTISE_COLOR_MAP[currentStatus]}`}
+                          >
+                            <span className="text-[11px] font-semibold">
+                              {part.label}
+                            </span>
+                            <select
+                              value={currentStatus}
+                              onChange={(e) =>
+                                setEditingVehicle({
+                                  ...editingVehicle,
+                                  expertiseReport: {
+                                    ...(editingVehicle.expertiseReport ||
+                                      DEFAULT_EXPERTISE_REPORT),
+                                    [part.key]: e.target.value as ExpertiseStatus,
+                                  },
+                                })
+                              }
+                              className="text-[11px] font-bold bg-white text-[#111F35] px-1 py-0.5 rounded border border-black/10"
+                            >
+                              {EXPERTISE_STATUSES.map((st) => (
+                                <option key={st} value={st}>
+                                  {st}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
 
                 <div>

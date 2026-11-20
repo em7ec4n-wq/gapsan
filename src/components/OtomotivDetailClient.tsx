@@ -21,6 +21,7 @@ const STATUS_BADGE_STYLES: Record<ExpertiseStatus, string> = {
   "Lokal Boyalı": "bg-amber-50 text-amber-800 border-amber-200",
   Boyalı: "bg-orange-50 text-orange-800 border-orange-200",
   Değişen: "bg-red-50 text-red-800 border-red-200",
+  İşlemli: "bg-purple-50 text-purple-800 border-purple-200",
 };
 
 const STATUS_DOT_STYLES: Record<ExpertiseStatus, string> = {
@@ -28,6 +29,7 @@ const STATUS_DOT_STYLES: Record<ExpertiseStatus, string> = {
   "Lokal Boyalı": "bg-amber-500",
   Boyalı: "bg-orange-500",
   Değişen: "bg-red-600",
+  İşlemli: "bg-purple-600",
 };
 
 export default function OtomotivDetailClient({ slug }: { slug: string }) {
@@ -261,10 +263,10 @@ export default function OtomotivDetailClient({ slug }: { slug: string }) {
             )}
 
             {hasExpertiseReport && (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-3 text-[12px] font-semibold">
                   {(
-                    ["Orijinal", "Lokal Boyalı", "Boyalı", "Değişen"] as ExpertiseStatus[]
+                    ["Orijinal", "Lokal Boyalı", "Boyalı", "Değişen", "İşlemli"] as ExpertiseStatus[]
                   ).map((st) => (
                     <span key={st} className="inline-flex items-center gap-1.5">
                       <span
@@ -275,20 +277,57 @@ export default function OtomotivDetailClient({ slug }: { slug: string }) {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                  {VEHICLE_PARTS.map((part) => {
-                    const status: ExpertiseStatus =
-                      expertiseReport[part.key] || "Orijinal";
-                    return (
-                      <div
-                        key={part.key}
-                        className={`px-3 py-2 rounded-[8px] border flex items-center justify-between text-[13px] ${STATUS_BADGE_STYLES[status]}`}
-                      >
-                        <span className="font-medium">{part.label}</span>
-                        <span className="font-bold text-[12px]">{status}</span>
-                      </div>
-                    );
-                  })}
+                {/* Kritik Güvenlik: Şaseler & Airbag */}
+                <div className="p-3.5 rounded-[10px] bg-slate-50 border border-slate-200 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] font-bold text-[#111F35] flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-[#D6A948]" />
+                      <span>Şase, Podye &amp; Airbag (Kritik Güvenlik)</span>
+                    </span>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                      Doğrulanmış Kontrol
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    {VEHICLE_PARTS.filter((p) => p.category === "sase_guvenlik").map((part) => {
+                      const status: ExpertiseStatus =
+                        expertiseReport[part.key] || "Orijinal";
+                      return (
+                        <div
+                          key={part.key}
+                          className={`px-3 py-2 rounded-[8px] border flex items-center justify-between text-[13px] font-semibold ${STATUS_BADGE_STYLES[status]}`}
+                        >
+                          <span className="truncate">{part.label}</span>
+                          <span className="font-extrabold text-[12px] shrink-0 ml-2">
+                            {status}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Kaporta & Dış Gövde Parçaları */}
+                <div>
+                  <h4 className="text-[13px] font-bold text-[#111F35] mb-2 flex items-center gap-1.5">
+                    <span>Kaporta &amp; Dış Parçalar</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                    {VEHICLE_PARTS.filter((p) => p.category === "kaporta").map((part) => {
+                      const status: ExpertiseStatus =
+                        expertiseReport[part.key] || "Orijinal";
+                      return (
+                        <div
+                          key={part.key}
+                          className={`px-3 py-2 rounded-[8px] border flex items-center justify-between text-[13px] ${STATUS_BADGE_STYLES[status]}`}
+                        >
+                          <span className="font-medium truncate">{part.label}</span>
+                          <span className="font-bold text-[12px] shrink-0 ml-2">{status}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}

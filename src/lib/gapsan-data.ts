@@ -2,22 +2,32 @@ export type PublishStatus = "Taslak" | "Onay bekliyor" | "Yayında" | "Arşiv";
 
 export type BusinessArea = "otomotiv" | "gayrimenkul" | "sigorta";
 
-export type ExpertiseStatus = "Orijinal" | "Lokal Boyalı" | "Boyalı" | "Değişen";
+export type ExpertiseStatus =
+  | "Orijinal"
+  | "Lokal Boyalı"
+  | "Boyalı"
+  | "Değişen"
+  | "İşlemli";
 
 export const VEHICLE_PARTS = [
-  { key: "kaput", label: "Motor Kaputu" },
-  { key: "tavan", label: "Tavan" },
-  { key: "bagaj", label: "Bagaj Kapağı" },
-  { key: "solOnCamurluk", label: "Sol Ön Çamurluk" },
-  { key: "solOnKapi", label: "Sol Ön Kapı" },
-  { key: "solArkaKapi", label: "Sol Arka Kapı" },
-  { key: "solArkaCamurluk", label: "Sol Arka Çamurluk" },
-  { key: "sagOnCamurluk", label: "Sağ Ön Çamurluk" },
-  { key: "sagOnKapi", label: "Sağ Ön Kapı" },
-  { key: "sagArkaKapi", label: "Sağ Arka Kapı" },
-  { key: "sagArkaCamurluk", label: "Sağ Arka Çamurluk" },
-  { key: "onTampon", label: "Ön Tampon" },
-  { key: "arkaTampon", label: "Arka Tampon" },
+  { key: "kaput", label: "Motor Kaputu", category: "kaporta" },
+  { key: "tavan", label: "Tavan", category: "kaporta" },
+  { key: "bagaj", label: "Bagaj Kapağı", category: "kaporta" },
+  { key: "solOnCamurluk", label: "Sol Ön Çamurluk", category: "kaporta" },
+  { key: "solOnKapi", label: "Sol Ön Kapı", category: "kaporta" },
+  { key: "solArkaKapi", label: "Sol Arka Kapı", category: "kaporta" },
+  { key: "solArkaCamurluk", label: "Sol Arka Çamurluk", category: "kaporta" },
+  { key: "sagOnCamurluk", label: "Sağ Ön Çamurluk", category: "kaporta" },
+  { key: "sagOnKapi", label: "Sağ Ön Kapı", category: "kaporta" },
+  { key: "sagArkaKapi", label: "Sağ Arka Kapı", category: "kaporta" },
+  { key: "sagArkaCamurluk", label: "Sağ Arka Çamurluk", category: "kaporta" },
+  { key: "onTampon", label: "Ön Tampon", category: "kaporta" },
+  { key: "arkaTampon", label: "Arka Tampon", category: "kaporta" },
+  { key: "solOnSase", label: "Sol Ön Şase", category: "sase_guvenlik" },
+  { key: "sagOnSase", label: "Sağ Ön Şase", category: "sase_guvenlik" },
+  { key: "solArkaSase", label: "Sol Arka Şase", category: "sase_guvenlik" },
+  { key: "sagArkaSase", label: "Sağ Arka Şase", category: "sase_guvenlik" },
+  { key: "airbag", label: "Hava Yastıkları (Airbag)", category: "sase_guvenlik" },
 ] as const;
 
 export const DEFAULT_EXPERTISE_REPORT: Record<string, ExpertiseStatus> = {
@@ -34,6 +44,11 @@ export const DEFAULT_EXPERTISE_REPORT: Record<string, ExpertiseStatus> = {
   sagArkaCamurluk: "Orijinal",
   onTampon: "Orijinal",
   arkaTampon: "Orijinal",
+  solOnSase: "Orijinal",
+  sagOnSase: "Orijinal",
+  solArkaSase: "Orijinal",
+  sagArkaSase: "Orijinal",
+  airbag: "Orijinal",
 };
 
 export const VEHICLE_FEATURES_LIST = [
