@@ -89,8 +89,11 @@ export default function OtomotivClient() {
   );
 
   const showDemoPassat = useMemo(
-    () => previewMode && matchesFilters(demoVehicle),
-    [previewMode, demoVehicle, applied]
+    () =>
+      previewMode &&
+      publishedVehicles.length === 0 &&
+      matchesFilters(demoVehicle),
+    [previewMode, publishedVehicles.length, demoVehicle, applied]
   );
 
   const hasActiveFilters = Boolean(

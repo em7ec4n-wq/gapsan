@@ -62,8 +62,8 @@ async function compressImageFile(file: File): Promise<string> {
     reader.onload = (ev) => {
       const img = new Image();
       img.onload = () => {
-        const MAX_W = 1280;
-        const MAX_H = 960;
+        const MAX_W = 1000;
+        const MAX_H = 750;
         let w = img.width;
         let h = img.height;
         if (w > MAX_W || h > MAX_H) {
@@ -80,7 +80,7 @@ async function compressImageFile(file: File): Promise<string> {
           return;
         }
         ctx.drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL("image/jpeg", 0.78));
+        resolve(canvas.toDataURL("image/jpeg", 0.72));
       };
       img.onerror = () => reject(new Error("Görsel okunamadı"));
       img.src = ev.target?.result as string;
@@ -2741,6 +2741,156 @@ export default function YonetimClient() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Marka *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingVehicle.brand || ""}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        brand: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                    placeholder="Örn: Volkswagen"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Model *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingVehicle.model || ""}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        model: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                    placeholder="Örn: Passat"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Model Yılı
+                  </label>
+                  <input
+                    type="number"
+                    value={editingVehicle.year || ""}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        year: e.target.value ? Number(e.target.value) : null,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                    placeholder="Örn: 2021"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Yayın Durumu
+                  </label>
+                  <select
+                    value={editingVehicle.status}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        status: e.target.value as PublishStatus,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2 rounded border border-[#E0E4EA] text-[12px] font-bold bg-white"
+                  >
+                    <option value="Yayında">Yayında (Canlı)</option>
+                    <option value="Taslak">Taslak</option>
+                    <option value="Onay bekliyor">Onay bekliyor</option>
+                    <option value="Arşiv">Arşiv</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Vites
+                  </label>
+                  <select
+                    value={editingVehicle.transmission || "Otomatik"}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        transmission: e.target.value as VehicleListing["transmission"],
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2 rounded border border-[#E0E4EA] text-[12px] bg-white"
+                  >
+                    <option value="Otomatik">Otomatik</option>
+                    <option value="Manuel">Manuel</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Yakıt
+                  </label>
+                  <select
+                    value={editingVehicle.fuel || "Benzin"}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        fuel: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2 rounded border border-[#E0E4EA] text-[12px] bg-white"
+                  >
+                    <option value="Benzin">Benzin</option>
+                    <option value="Dizel">Dizel</option>
+                    <option value="Hibrit">Hibrit</option>
+                    <option value="Elektrik">Elektrik</option>
+                    <option value="LPG">LPG / Benzin</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Motor Gücü
+                  </label>
+                  <input
+                    type="text"
+                    value={editingVehicle.horsepower || ""}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        horsepower: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                    placeholder="Örn: 150 HP"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Stok Durumu
+                  </label>
+                  <input
+                    type="text"
+                    value={editingVehicle.stockInfo || ""}
+                    onChange={(e) =>
+                      setEditingVehicle({
+                        ...editingVehicle,
+                        stockInfo: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                    placeholder="Örn: Galeride Müsait"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
                     Fiyat
                   </label>
                   <input
@@ -3067,6 +3217,85 @@ export default function YonetimClient() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    İlan Türü *
+                  </label>
+                  <select
+                    value={editingRealEstate.listingType}
+                    onChange={(e) =>
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        listingType: e.target.value as "Satılık" | "Kiralık",
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2 rounded border border-[#E0E4EA] text-[12px] font-bold bg-white"
+                  >
+                    <option value="Satılık">Satılık</option>
+                    <option value="Kiralık">Kiralık</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Gayrimenkul Türü
+                  </label>
+                  <select
+                    value={editingRealEstate.propertyType}
+                    onChange={(e) =>
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        propertyType: e.target.value as RealEstateListing["propertyType"],
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2 rounded border border-[#E0E4EA] text-[12px] bg-white"
+                  >
+                    <option value="Daire">Daire</option>
+                    <option value="İş Yeri">Dükkan / İş Yeri</option>
+                    <option value="Ofis">Ofis / Büro</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Arsa">Arsa</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Bulunduğu Kat
+                  </label>
+                  <input
+                    type="text"
+                    value={editingRealEstate.floor || ""}
+                    onChange={(e) =>
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        floor: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                    placeholder="Örn: 3. Kat"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Yayın Durumu
+                  </label>
+                  <select
+                    value={editingRealEstate.status}
+                    onChange={(e) =>
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        status: e.target.value as PublishStatus,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2 rounded border border-[#E0E4EA] text-[12px] font-bold bg-white"
+                  >
+                    <option value="Yayında">Yayında (Canlı)</option>
+                    <option value="Taslak">Taslak</option>
+                    <option value="Onay bekliyor">Onay bekliyor</option>
+                    <option value="Arşiv">Arşiv</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
                     Fiyat
                   </label>
                   <input
@@ -3127,6 +3356,60 @@ export default function YonetimClient() {
                       })
                     }
                     className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Bina Yaşı
+                  </label>
+                  <input
+                    type="text"
+                    value={editingRealEstate.buildingAge || ""}
+                    onChange={(e) =>
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        buildingAge: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                    placeholder="Örn: 0 (Sıfır Bina)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Isıtma Tipi
+                  </label>
+                  <input
+                    type="text"
+                    value={editingRealEstate.heating || ""}
+                    onChange={(e) =>
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        heating: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                    placeholder="Örn: Kombi (Doğalgaz)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#182538] mb-1">
+                    Tapu Durumu
+                  </label>
+                  <input
+                    type="text"
+                    value={editingRealEstate.deedStatus || ""}
+                    onChange={(e) =>
+                      setEditingRealEstate({
+                        ...editingRealEstate,
+                        deedStatus: e.target.value,
+                      })
+                    }
+                    className="w-full min-h-[38px] px-2.5 rounded border border-[#E0E4EA] text-[13px]"
+                    placeholder="Örn: Kat Mülkiyetli (İskanlı)"
                   />
                 </div>
               </div>

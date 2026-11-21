@@ -165,13 +165,13 @@ export function GapsanStoreProvider({
       );
       setSlidesState(hasLegacyCopy ? INITIAL_HERO_SLIDES : (parsed.slides as HeroSlideConfig[]));
     }
-    if (Array.isArray(parsed.vehicles) && parsed.vehicles.length > 0) {
+    if (Array.isArray(parsed.vehicles)) {
       setVehiclesState(parsed.vehicles as VehicleListing[]);
     }
-    if (Array.isArray(parsed.realEstates) && parsed.realEstates.length > 0) {
+    if (Array.isArray(parsed.realEstates)) {
       setRealEstatesState(parsed.realEstates as RealEstateListing[]);
     }
-    if (Array.isArray(parsed.projects) && parsed.projects.length > 0) {
+    if (Array.isArray(parsed.projects)) {
       setProjectsState(parsed.projects as ConstructionProject[]);
     }
     if (Array.isArray(parsed.reviews)) {
@@ -261,23 +261,30 @@ export function GapsanStoreProvider({
     fetch("/api/cms", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
-        if (!json?.data || isDirtyRef.current) return;
+        if (!json?.data) return;
         const cloudData = json.data;
         const cloudTimestamp =
           typeof cloudData.updatedAt === "number" ? cloudData.updatedAt : 0;
-        const cloudVehiclesCount = Array.isArray(cloudData.vehicles)
-          ? cloudData.vehicles.length
-          : 0;
-        const cloudRealEstatesCount = Array.isArray(cloudData.realEstates)
-          ? cloudData.realEstates.length
-          : 0;
 
-        if (
-          cloudTimestamp >= localTimestamp ||
-          (localVehiclesCount === 0 && cloudVehiclesCount > 0) ||
-          (localRealEstatesCount === 0 && cloudRealEstatesCount > 0)
-        ) {
+        if (cloudTimestamp > localTimestamp) {
+          // Cloud has newer data -> apply to state and sync to localStorage
           applyParsedState(cloudData);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData));
+          } catch {}
+        } else if (localTimestamp > cloudTimestamp && localTimestamp > 0) {
+          // Local has newer data -> push local state to cloud so cloud stays updated
+          const localSaved = localStorage.getItem(STORAGE_KEY);
+          if (localSaved) {
+            try {
+              fetch("/api/cms", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: localSaved,
+                keepalive: true,
+              }).catch(() => {});
+            } catch {}
+          }
         }
       })
       .catch(() => {
@@ -287,8 +294,12 @@ export function GapsanStoreProvider({
 
   useEffect(() => {
     if (!hydrated) return;
+    const now = Date.now();
+    if (isDirtyRef.current) {
+      updatedAtRef.current = now;
+    }
     const payload = {
-      updatedAt: updatedAtRef.current || Date.now(),
+      updatedAt: updatedAtRef.current || now,
       previewMode,
       slides,
       vehicles,
@@ -307,17 +318,15 @@ export function GapsanStoreProvider({
 
     if (!isDirtyRef.current) return;
 
-    const timer = setTimeout(() => {
+    // Send immediately with keepalive: true so browser navigation never cancels the save
+    try {
       fetch("/api/cms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }).catch(() => {
-        // ignore
-      });
-    }, 350);
-
-    return () => clearTimeout(timer);
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
   }, [
     hydrated,
     previewMode,

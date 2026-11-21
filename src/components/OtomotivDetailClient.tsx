@@ -44,16 +44,12 @@ export default function OtomotivDetailClient({ slug }: { slug: string }) {
   const [activePhoto, setActivePhoto] = useState(0);
 
   const decodedSlug = decodeURIComponent(slug);
-  const isDemo = decodedSlug === demoVehicle.slug;
   const matchedVehicle = vehicles.find(
     (v) => v.slug === decodedSlug || v.id === decodedSlug
   );
+  const isDemo = decodedSlug === demoVehicle.slug;
 
-  const listing = isDemo
-    ? previewMode
-      ? demoVehicle
-      : null
-    : matchedVehicle ?? null;
+  const listing = matchedVehicle ?? (isDemo && previewMode ? demoVehicle : null);
 
   if (!hydrated && !listing) {
     return (
